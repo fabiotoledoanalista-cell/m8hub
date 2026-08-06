@@ -1,8 +1,6 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/followup-dispatch",
-      "schedule": "0 12 * * *"
-    }
-  ]
+  "buildCommand": "bun run build",
+  "outputDirectory": ".vercel/output",
+  "installCommand": "bun install",
+  "framework": null
 }

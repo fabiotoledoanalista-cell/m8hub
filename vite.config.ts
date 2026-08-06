@@ -5,7 +5,7 @@ export default defineConfig({
     server: { entry: "server" },
   },
   nitro: {
-    preset: "node-server",
+    preset: "vercel",
   },
   define: {
     "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(
