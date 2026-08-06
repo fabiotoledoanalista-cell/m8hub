@@ -1,0 +1,299 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-master: var(--brand-master);
+  --color-surface: var(--surface);
+  --color-panel-2: var(--panel-2);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+/* ============================================================
+   THEME — ToledoTech Design System v2.0 · Digital Futurista Dark
+   ============================================================ */
+:root {
+  color-scheme: dark;
+  --radius: 0.75rem;
+
+  /* ── Tokens oficiais do Design System ── */
+  --darkBg: #0F1623;
+  --neonGreen: #34D399;
+  --selectBlue: #1E2E48;
+  --selectBlueBorder: #2E4570;
+  --selectBlueText: #7EB3F5;
+  --textPrimary: #CBD5E1;
+  --textMuted: #64748B;
+  --errorRed: #F87171;
+  --errorBg: rgba(248,113,113,0.08);
+  --errorBorder: rgba(248,113,113,0.25);
+  --warnAmber: #FBBF24;
+  --warnBg: rgba(251,191,36,0.08);
+  --warnBorder: rgba(251,191,36,0.25);
+  --infoBlue: #60A5FA;
+  --infoBg: rgba(96,165,250,0.08);
+  --infoBorder: rgba(96,165,250,0.25);
+
+  /* ── Mapeamento para variáveis do sistema ── */
+  --brand: var(--neonGreen);
+  --brand-strong: #059669;
+  --brand-master: var(--errorRed);
+
+  --bg-deep: var(--darkBg);
+  --panel: #1A2540;
+  --panel-2: var(--selectBlue);
+  --hairline: #263350;
+  --hairline-strong: rgba(46,69,112,0.6);
+
+  --surface: var(--panel);
+  --sidebar-bg: var(--darkBg);
+
+  --background: var(--bg-deep);
+  --foreground: var(--textPrimary);
+  --card: var(--panel);
+  --card-foreground: var(--textPrimary);
+  --popover: #1A2540;
+  --popover-foreground: var(--textPrimary);
+
+  --primary: var(--neonGreen);
+  --primary-foreground: #0A1F14;
+  --secondary: var(--selectBlue);
+  --secondary-foreground: var(--textPrimary);
+  --muted: #151F30;
+  --muted-foreground: var(--textMuted);
+  --accent: var(--selectBlue);
+  --accent-foreground: var(--selectBlueText);
+  --destructive: var(--errorRed);
+  --destructive-foreground: #1B0606;
+  --border: var(--hairline);
+  --input: rgba(255,255,255,.08);
+  --ring: var(--selectBlueBorder);
+
+  --chart-1: #34D399;
+  --chart-2: #60A5FA;
+  --chart-3: #A3E635;
+  --chart-4: #F87171;
+  --chart-5: #FBBF24;
+
+  --sidebar: var(--sidebar-bg);
+  --sidebar-foreground: var(--textPrimary);
+  --sidebar-primary: var(--neonGreen);
+  --sidebar-primary-foreground: #0A1F14;
+  --sidebar-accent: var(--selectBlue);
+  --sidebar-accent-foreground: var(--selectBlueText);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--selectBlueBorder);
+
+  --brand-soft: rgba(52,211,153,.10);
+  --brand-soft-strong: rgba(52,211,153,.20);
+  --brand-text: var(--neonGreen);
+
+  --shadow-card: 0 1px 0 rgba(255,255,255,.03) inset, 0 4px 16px -8px rgba(0,0,0,.6);
+  --shadow-glow: 0 0 0 1px rgba(52,211,153,.18), 0 8px 28px -10px rgba(52,211,153,.25);
+
+  --page-gradient:
+    radial-gradient(1000px 500px at 80% -10%, rgba(52,211,153,.05), transparent 60%),
+    radial-gradient(800px 400px at -10% 20%, rgba(46,69,112,.08), transparent 60%),
+    var(--bg-deep);
+}
+
+/* .dark alias para compatibilidade com componentes shadcn */
+.dark {
+  color-scheme: dark;
+}
+
+html, body {
+  background: #0D1117;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sobrepõe fundo das páginas com gradient suave */
+#app, [data-router-outlet] > div {
+  background: var(--page-gradient);
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+h1 { font-size: 26px; font-weight: 800; }
+h2 { font-size: 20px; font-weight: 700; }
+h3 { font-size: 17px; font-weight: 600; }
+label, .label { font-size: 13.5px; font-weight: 600; }
+
+@layer base {
+  * { border-color: var(--color-border); }
+}
+
+@utility text-gradient-brand {
+  background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-gradient-brand {
+  background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+}
+
+@utility glow-brand {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility panel {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+@utility dot-pulse {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: .35;
+    animation: dot-pulse 1.6s ease-out infinite;
+  }
+}
+
+@keyframes dot-pulse {
+  0% { transform: scale(0.6); opacity: .5; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ============================================================
+   DESIGN SYSTEM — Componentes e Utilitários
+   ============================================================ */
+
+/* Fonte mono para valores numéricos/tabulares */
+.font-mono,
+.mono,
+td.mono,
+[data-mono] {
+  font-family: var(--font-mono);
+}
+
+/* Botões */
+.btn-green {
+  background: var(--neonGreen);
+  color: #0A1F14;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 16px;
+  transition: box-shadow 0.2s;
+}
+.btn-green:hover {
+  box-shadow: 0 4px 20px rgba(52,211,153,0.25);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--textMuted);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-ghost:hover {
+  background: var(--selectBlue);
+  color: var(--selectBlueText);
+}
+.btn-danger {
+  background: var(--errorBg);
+  color: var(--errorRed);
+  border: 1px solid var(--errorBorder);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+/* Alertas inline */
+.alert {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  border: 1px solid;
+}
+.alert.error   { background: var(--errorBg);  border-color: var(--errorBorder); color: var(--errorRed); }
+.alert.warning { background: var(--warnBg);   border-color: var(--warnBorder);  color: var(--warnAmber); }
+.alert.info    { background: var(--infoBg);   border-color: var(--infoBorder);  color: var(--infoBlue); }
+.alert.success { background: var(--brand-soft); border-color: var(--brand-soft-strong); color: var(--neonGreen); }
+
+/* Tabelas — densidade */
+.tbl-comfortable td { padding: 14px 10px; font-size: 12px; }
+.tbl-normal td      { padding: 9px 10px;  font-size: 12px; }
+.tbl-compact td     { padding: 5px 10px;  font-size: 11px; }
+
+/* Hover e ativo em linhas de tabela */
+tr:hover td { background: var(--selectBlue); }
+
+/* Ações de linha — ocultas, visíveis no hover */
+tr .row-actions { opacity: 0; transition: opacity 0.15s; }
+tr:hover .row-actions { opacity: 1; }
+
+/* Item ativo de menu (azul de seleção) */
+.active-blue {
+  background: var(--selectBlue);
+  border-left: 2px solid var(--selectBlueBorder);
+  color: var(--selectBlueText);
+}
+
+/* Badge de módulo */
+.mb-green { background: rgba(52,211,153,.12); color: var(--neonGreen); border: 1px solid rgba(52,211,153,.25); border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 600; }
+.mb-blue  { background: var(--infoBg); color: var(--infoBlue); border: 1px solid var(--infoBorder); border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 600; }

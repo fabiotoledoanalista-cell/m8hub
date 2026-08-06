@@ -1,0 +1,1511 @@
+#!/bin/bash
+#
+# WhatIcket SaaS - Instalador Unificado para Ubuntu 22.04/24.04 LTS
+# Desenvolvido por: ZapChatPro
+# Contato: (27) 99671-6613
+# E-mail: zapchatprobr@gmail.com
+#
+
+set -Eeuo pipefail  # Exit on error
+
+# Forcar instalacao nao interativa em qualquer ambiente
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export NEEDRESTART_SUSPEND=1
+
+# ============================================================================
+# VERIFICAÇÃO DOCKER LOGIN (ANTI RATE LIMIT)
+# ============================================================================
+
+echo -e "\n🔎 Verificando autenticação do Docker Hub..."
+
+IP_SAIDA=$(curl -s -4 ifconfig.me || echo "Não detectado")
+echo -e "🌐 IP de saída detectado: $IP_SAIDA\n"
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "⚠️ Docker ainda não está instalado."
+  echo "Ele será instalado durante o processo."
+else
+  if ! docker info 2>/dev/null | grep -q "Username:"; then
+    echo "⚠️ Docker NÃO está autenticado."
+    echo "Para evitar bloqueio de pulls do Docker Hub, faça login:"
+    echo ""
+    docker login || {
+      echo ""
+      echo "❌ Falha no login do Docker."
+      echo "Instalação cancelada."
+      exit 1
+    }
+  else
+    echo "✅ Docker já autenticado."
+  fi
+fi
+
+echo ""
+sleep 1
+
+# ============================================================================
+# VARIÁVEIS GLOBAIS
+# ============================================================================
+
+# Cores e estilos
+readonly RED="\033[1;31m"
+readonly GREEN="\033[1;32m"
+readonly WHITE="\033[1;37m"
+readonly YELLOW="\033[1;33m"
+readonly GRAY_LIGHT="\033[0;37m"
+readonly CYAN_LIGHT="\033[1;36m"
+readonly NC="\033[0m"
+readonly BG_BROWN="\e[0;43m"
+readonly BOLD=$(tput bold)
+readonly NORMAL=$(tput sgr0)
+
+# Variáveis da aplicação
+readonly JWT_SECRET="3123123213123"
+readonly JWT_REFRESH_SECRET="75756756756"
+readonly DEPLOY_PASSWORD="Master123"
+readonly DB_PASS="ZdG387FhYsm0olSm097541HMSdS"
+readonly DB_USER="root"
+readonly DB_NAME="whaticket"
+readonly DEPLOY_EMAIL="deploy@whaticket.com"
+
+# Versoes definidas dinamicamente conforme o Ubuntu detectado
+UBUNTU_VERSION=""
+UBUNTU_CODENAME=""
+UBUNTU_NAME=""
+UBUNTU_EDITION="Ubuntu 22.04/24.04 LTS"
+NODE_VERSION="20.x"
+POSTGRES_VERSION=""
+
+# Obter diretório do script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$PROJECT_ROOT/$SOURCE"
+done
+PROJECT_ROOT="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+# ============================================================================
+# FUNÇÕES DE UTILIDADES
+# ============================================================================
+
+print_banner() {
+  clear
+  printf "\n\n"
+  printf "${GREEN}"
+  printf "       ███████╗ █████╗ ██████╗  ██████╗██╗  ██╗ █████╗ ████████╗\n"
+  printf "       ╚══███╔╝██╔══██╗██╔══██╗██╔════╝██║  ██║██╔══██╗╚══██╔══╝\n"
+  printf "         ███╔╝ ███████║██████╔╝██║     ███████║███████║   ██║   \n"
+  printf "        ███╔╝  ██╔══██║██╔═══╝ ██║     ██╔══██║██╔══██║   ██║   \n"
+  printf "       ███████╗██║  ██║██║     ╚██████╗██║  ██║██║  ██║   ██║   \n"
+  printf "       ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   \n"
+  printf "${NC}\n"
+  printf "${CYAN_LIGHT}"
+  printf "       ★ ${UBUNTU_EDITION} Edition ★\n"
+  printf "${NC}\n"
+  printf "${YELLOW}"
+  printf "       Desenvolvimento: ZapChatPro\n"
+  printf "       Contato: (27) 99671-6613\n"
+  printf "       E-mail: zapchatprobr@gmail.com\n"
+  printf "${NC}\n"
+}
+
+log_info() {
+  printf "${WHITE}ℹ️  $1${GRAY_LIGHT}\n"
+}
+
+log_success() {
+  printf "${GREEN}✅ $1${GRAY_LIGHT}\n"
+}
+
+log_error() {
+  printf "${RED}❌ $1${GRAY_LIGHT}\n"
+}
+
+log_warning() {
+  printf "${YELLOW}⚠️  $1${GRAY_LIGHT}\n"
+}
+
+check_ubuntu_version() {
+  print_banner
+  log_info "Verificando versão do Ubuntu (22.04/24.04)..."
+  
+  if [ -f /etc/os-release ]; then
+    DETECTED_VERSION=$(grep "VERSION_ID" /etc/os-release | cut -d'"' -f2)
+    DETECTED_NAME=$(grep "^NAME=" /etc/os-release | cut -d'"' -f2)
+    DETECTED_CODENAME=$(grep "^VERSION_CODENAME=" /etc/os-release | cut -d'=' -f2)
+
+    UBUNTU_VERSION="${DETECTED_VERSION}"
+    UBUNTU_CODENAME="${DETECTED_CODENAME}"
+    UBUNTU_NAME="${DETECTED_NAME}"
+
+    if [ "${DETECTED_VERSION}" = "24.04" ]; then
+      POSTGRES_VERSION="16"
+      UBUNTU_EDITION="Ubuntu 24.04 LTS (Noble Numbat)"
+      log_success "Ubuntu 24.04 LTS detectado ✓"
+    elif [ "${DETECTED_VERSION}" = "22.04" ]; then
+      POSTGRES_VERSION="14"
+      UBUNTU_EDITION="Ubuntu 22.04 LTS (Jammy Jellyfish)"
+      log_success "Ubuntu 22.04 LTS detectado ✓"
+    else
+      log_warning "Este instalador suporta oficialmente Ubuntu 22.04 e 24.04"
+      log_warning "Versão detectada: ${DETECTED_NAME} ${DETECTED_VERSION}"
+      read -p "Deseja continuar mesmo assim? (s/N): " continue_anyway
+      if [[ ! "$continue_anyway" =~ ^[Ss]$ ]]; then
+        log_error "Instalação cancelada"
+        exit 1
+      fi
+      POSTGRES_VERSION="16"
+      UBUNTU_EDITION="${DETECTED_NAME} ${DETECTED_VERSION}"
+    fi
+  else
+    log_error "Não foi possível detectar a versão do Ubuntu"
+    exit 1
+  fi
+  sleep 2
+}
+
+# ============================================================================
+# FUNÇÕES DE ENTRADA DE DADOS
+# ============================================================================
+
+get_instancia_add() {
+  print_banner
+  printf "${WHITE}💻 Informe um nome para a Instância/Empresa (sem espaços, minúsculas):${GRAY_LIGHT}\n\n"
+  read -p "> " instancia_add
+}
+
+get_max_whats() {
+  print_banner
+  printf "${WHITE}💻 Qtde de Conexões/Whats para ${instancia_add}:${GRAY_LIGHT}\n\n"
+  read -p "> " max_whats
+}
+
+get_max_user() {
+  print_banner
+  printf "${WHITE}💻 Qtde de Usuários/Atendentes para ${instancia_add}:${GRAY_LIGHT}\n\n"
+  read -p "> " max_user
+}
+
+get_frontend_url() {
+  print_banner
+  printf "${WHITE}💻 Domínio do FRONTEND/PAINEL para ${instancia_add}:${GRAY_LIGHT}\n\n"
+  read -p "> " frontend_url
+}
+
+get_backend_url() {
+  print_banner
+  printf "${WHITE}💻 Domínio do BACKEND/API para ${instancia_add}:${GRAY_LIGHT}\n\n"
+  read -p "> " backend_url
+}
+
+get_frontend_port() {
+  print_banner
+  printf "${WHITE}💻 Porta do FRONTEND (Ex: 3000 a 3999):${GRAY_LIGHT}\n\n"
+  read -p "> " frontend_port
+}
+
+get_backend_port() {
+  print_banner
+  printf "${WHITE}💻 Porta do BACKEND (Ex: 4000 a 4999):${GRAY_LIGHT}\n\n"
+  read -p "> " backend_port
+}
+
+get_redis_port() {
+  print_banner
+  printf "${WHITE}💻 Porta do REDIS (Ex: 5000 a 5999):${GRAY_LIGHT}\n\n"
+  read -p "> " redis_port
+}
+
+generate_redis_password() {
+  print_banner
+  printf "${WHITE}💻 Gerando senha segura para Redis...${GRAY_LIGHT}\n\n"
+  
+  redis_pass=$(openssl rand -base64 12 | tr -d "=+/" | cut -c1-16)
+  
+  if ! [[ "$redis_pass" =~ [0-9] ]] || ! [[ "$redis_pass" =~ [A-Za-z] ]]; then
+    redis_pass="Redis$(openssl rand -base64 8 | tr -d "=+/" | cut -c1-8)99"
+  fi
+  
+  log_success "Senha do Redis: ${redis_pass}"
+  log_warning "ANOTE ESTA SENHA!"
+  sleep 3
+  export redis_pass
+}
+
+get_empresa_delete() {
+  print_banner
+  printf "${WHITE}💻 Nome da Instância a ser DELETADA:${GRAY_LIGHT}\n\n"
+  read -p "> " empresa_delete
+}
+
+get_empresa_bloquear() {
+  print_banner
+  printf "${WHITE}💻 Nome da Instância a BLOQUEAR:${GRAY_LIGHT}\n\n"
+  read -p "> " empresa_bloquear
+}
+
+get_empresa_desbloquear() {
+  print_banner
+  printf "${WHITE}💻 Nome da Instância a DESBLOQUEAR:${GRAY_LIGHT}\n\n"
+  read -p "> " empresa_desbloquear
+}
+
+get_empresa_dominio() {
+  print_banner
+  printf "${WHITE}💻 Nome da Instância para alterar domínios:${GRAY_LIGHT}\n\n"
+  read -p "> " empresa_dominio
+}
+
+get_alter_frontend_url() {
+  print_banner
+  printf "${WHITE}💻 NOVO domínio do FRONTEND:${GRAY_LIGHT}\n\n"
+  read -p "> " alter_frontend_url
+}
+
+get_alter_backend_url() {
+  print_banner
+  printf "${WHITE}💻 NOVO domínio do BACKEND:${GRAY_LIGHT}\n\n"
+  read -p "> " alter_backend_url
+}
+
+get_alter_frontend_port() {
+  print_banner
+  printf "${WHITE}💻 Porta do FRONTEND (mesma da instalação):${GRAY_LIGHT}\n\n"
+  read -p "> " alter_frontend_port
+}
+
+get_alter_backend_port() {
+  print_banner
+  printf "${WHITE}💻 Porta do BACKEND (mesma da instalação):${GRAY_LIGHT}\n\n"
+  read -p "> " alter_backend_port
+}
+
+# ============================================================================
+# FUNÇÕES DO SISTEMA
+# ============================================================================
+
+system_configure_noninteractive() {
+  print_banner
+  log_info "Configurando modo não-interativo..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  
+  # Configuracoes para instalacao nao interativa
+  echo 'libc6 libraries/restart-without-asking boolean true' | debconf-set-selections
+  echo 'libssl3:amd64 libraries/restart-without-asking boolean true' | debconf-set-selections
+  echo 'apt-listchanges apt-listchanges/frontend select none' | debconf-set-selections
+  echo 'grub-pc grub-pc/install_devices_empty boolean true' | debconf-set-selections
+  echo 'grub-pc grub-pc/install_devices multiselect' | debconf-set-selections
+  echo 'grub2/update_nvram boolean false' | debconf-set-selections
+  
+  mkdir -p /etc/needrestart/conf.d/
+  cat > /etc/needrestart/conf.d/50local.conf <<'NREOF'
+$nrconf{restart} = 'a';
+$nrconf{kernelhints} = -1;
+NREOF
+  
+  # Configurar unattended-upgrades para não reiniciar automaticamente
+  echo 'Unattended-Upgrade::Automatic-Reboot "false";' > /etc/apt/apt.conf.d/52disable-auto-reboot
+  cat > /etc/apt/apt.conf.d/90zappro-noninteractive <<'APTEOF'
+Dpkg::Options {
+  "--force-confdef";
+  "--force-confold";
+}
+APT::Get::Assume-Yes "true";
+APT::Get::Quiet "1";
+APTEOF
+  
+  dpkg --configure -a
+EOF
+
+  log_success "Modo não-interativo configurado"
+  sleep 2
+}
+
+system_update() {
+  print_banner
+  log_info "Atualizando sistema e dependencias base..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  APT_FLAGS="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+  
+  apt-get update -q
+  apt-get ${APT_FLAGS} upgrade
+
+  UBUNTU_VER=$(grep "VERSION_ID" /etc/os-release | cut -d'"' -f2)
+  BASE_PACKAGES="libxshmfence-dev libgbm-dev wget unzip fontconfig locales \
+libc6 libcairo2 libdbus-1-3 libexpat1 libfontconfig1 libgcc-s1 libgdk-pixbuf2.0-0 \
+libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 \
+libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
+libxss1 libxtst6 ca-certificates fonts-liberation libnss3 lsb-release xdg-utils curl git \
+build-essential software-properties-common apt-transport-https gnupg libappindicator3-1"
+
+  if [ "${UBUNTU_VER}" = "24.04" ]; then
+    EXTRA_PACKAGES="libasound2t64 libatk1.0-0t64 libcups2t64 libglib2.0-0t64 libgtk-3-0t64"
+  else
+    EXTRA_PACKAGES="libasound2 libatk1.0-0 libcups2 libglib2.0-0 libgtk-3-0"
+  fi
+
+  apt-get ${APT_FLAGS} install ${BASE_PACKAGES} ${EXTRA_PACKAGES}
+EOF
+
+  log_success "Sistema atualizado"
+  sleep 2
+}
+
+system_create_user() {
+  print_banner
+  log_info "Criando usuário deploy..."
+  sleep 2
+
+  sudo su - root <<EOF
+  export DEBIAN_FRONTEND=noninteractive
+  
+  if id "deploy" &>/dev/null; then
+    echo "Usuário deploy já existe"
+  else
+    useradd -m -s /bin/bash deploy
+    echo "deploy:${DEPLOY_PASSWORD}" | chpasswd
+    usermod -aG sudo deploy
+    echo "Usuário deploy criado com sucesso"
+  fi
+EOF
+
+  sudo su - deploy <<'EOF'
+  set -Eeuo pipefail
+  NVM_VERSION="v0.39.7"
+  export NVM_DIR="$HOME/.nvm"
+
+  if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash || {
+      echo "ERRO: Falha ao instalar NVM para o usuario deploy."
+      exit 1
+    }
+  fi
+
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+  if ! nvm ls 20 >/dev/null 2>&1; then
+    nvm install 20 || {
+      echo "ERRO: Falha ao instalar Node.js 20 via NVM para deploy."
+      exit 1
+    }
+  fi
+
+  nvm use 20 >/dev/null
+  nvm alias default 20 >/dev/null
+
+  if ! node -v | grep -q '^v20\.'; then
+    echo "ERRO: Node.js do deploy nao esta em v20.x."
+    exit 1
+  fi
+EOF
+
+  log_success "Usuário deploy configurado"
+  sleep 2
+}
+
+system_add_user_to_docker() {
+  print_banner
+  log_info "Adicionando usuário deploy ao grupo Docker..."
+  sleep 2
+
+  sudo su - root <<EOF
+  # Adicionar ao grupo docker
+  if command -v docker &>/dev/null; then
+    usermod -aG docker deploy
+    echo "Usuário deploy adicionado ao grupo docker"
+  fi
+EOF
+
+  log_success "Usuário deploy adicionado ao Docker"
+  sleep 2
+}
+
+system_node_install() {
+  print_banner
+  log_info "Instalando Node.js ${NODE_VERSION} e PostgreSQL ${POSTGRES_VERSION}..."
+  sleep 2
+
+  sudo su - root <<EOF
+  set -Eeuo pipefail
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  APT_FLAGS="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+  NVM_VERSION="v0.39.7"
+  export NVM_DIR="\$HOME/.nvm"
+
+  # Instalar/carregar NVM e Node.js 20 (idempotente)
+  if [ ! -s "\$NVM_DIR/nvm.sh" ]; then
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/\${NVM_VERSION}/install.sh" | bash || {
+      echo "ERRO: Falha ao instalar NVM (\${NVM_VERSION})."
+      exit 1
+    }
+  fi
+
+  if [ ! -s "\$NVM_DIR/nvm.sh" ]; then
+    echo "ERRO: NVM nao encontrado em \$NVM_DIR/nvm.sh apos a instalacao."
+    exit 1
+  fi
+
+  . "\$NVM_DIR/nvm.sh"
+
+  if ! nvm ls 20 >/dev/null 2>&1; then
+    nvm install 20 || {
+      echo "ERRO: Falha ao instalar Node.js 20 via NVM."
+      exit 1
+    }
+  fi
+
+  nvm use 20 >/dev/null || {
+    echo "ERRO: Falha ao ativar Node.js 20 via NVM."
+    exit 1
+  }
+  nvm alias default 20 >/dev/null || {
+    echo "ERRO: Falha ao definir Node.js 20 como padrao no NVM."
+    exit 1
+  }
+
+  NODE20_VERSION="\$(nvm version 20)"
+  if [ "\$NODE20_VERSION" = "N/A" ]; then
+    echo "ERRO: NVM nao conseguiu resolver a versao Node 20."
+    exit 1
+  fi
+
+  export PATH="\$NVM_DIR/versions/node/\$NODE20_VERSION/bin:\$PATH"
+
+  if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+    echo "ERRO: node/npm nao encontrados apos configuracao do NVM."
+    exit 1
+  fi
+
+  NODE_ACTUAL="\$(node -v)"
+  case "\$NODE_ACTUAL" in
+    v20.*) ;;
+    *)
+      echo "ERRO: Versao invalida do Node instalada: \$NODE_ACTUAL (esperado v20.x)."
+      exit 1
+      ;;
+  esac
+
+  # Disponibilizar node/npm/npx/corepack para usuarios e subshells sem depender de profile
+  ln -sf "\$NVM_DIR/versions/node/\$NODE20_VERSION/bin/node" /usr/local/bin/node
+  ln -sf "\$NVM_DIR/versions/node/\$NODE20_VERSION/bin/npm" /usr/local/bin/npm
+  ln -sf "\$NVM_DIR/versions/node/\$NODE20_VERSION/bin/npx" /usr/local/bin/npx
+  ln -sf "\$NVM_DIR/versions/node/\$NODE20_VERSION/bin/corepack" /usr/local/bin/corepack
+
+  # Persistencia para sessoes futuras do root
+  if ! grep -qxF 'export NVM_DIR="$HOME/.nvm"' /root/.bashrc; then
+    cat >> /root/.bashrc <<'NVMEOF'
+export NVM_DIR="$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+NVMEOF
+  fi
+  
+  # Instalar PostgreSQL conforme versao do Ubuntu detectada
+  apt-get \${APT_FLAGS} install postgresql-${POSTGRES_VERSION} postgresql-client-${POSTGRES_VERSION} postgresql-contrib
+  
+  systemctl enable postgresql
+  systemctl start postgresql
+  
+  # Configurar timezone
+  timedatectl set-timezone America/Sao_Paulo
+  
+  # Verificar versões instaladas
+  echo "Node.js: \$(node -v)"
+  echo "npm: \$(npm -v)"
+  echo "PostgreSQL: \$(psql --version)"
+EOF
+
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="$NVM_DIR/versions/node/$(nvm version 20)/bin:$PATH"
+
+  if ! node -v | grep -q '^v20\.'; then
+    log_error "Falha na validacao do Node.js v20 no shell atual"
+    exit 1
+  fi
+
+  log_success "Node.js $(node --version) instalado"
+  log_success "PostgreSQL ${POSTGRES_VERSION} instalado"
+  sleep 2
+}
+
+system_pm2_install() {
+  print_banner
+  log_info "Instalando PM2..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="$NVM_DIR/versions/node/$(nvm version 20)/bin:$PATH"
+
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "ERRO: npm nao encontrado para instalar PM2."
+    exit 1
+  fi
+
+  npm install -g pm2@latest
+  PM2_BIN="$(command -v pm2)"
+  ln -sf "$PM2_BIN" /usr/local/bin/pm2
+  
+  # Configurar PM2 para iniciar no boot
+  pm2 startup systemd -u deploy --hp /home/deploy
+EOF
+
+  log_success "PM2 $(pm2 --version) instalado"
+  sleep 2
+}
+
+system_docker_install() {
+  print_banner
+  log_info "Instalando Docker..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  APT_FLAGS="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+  UBUNTU_CODENAME=$(grep "^VERSION_CODENAME=" /etc/os-release | cut -d'=' -f2)
+  
+  # Remover versões antigas
+  apt-get ${APT_FLAGS} remove docker docker-engine docker.io containerd runc 2>/dev/null || true
+  
+  # Instalar dependências
+  apt-get ${APT_FLAGS} install ca-certificates curl gnupg lsb-release
+  
+  # Criar diretório de keyrings se não existir
+  install -m 0755 -d /etc/apt/keyrings
+  
+  # Remover chave antiga se existir e baixar nova
+  rm -f /etc/apt/keyrings/docker.gpg
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  chmod a+r /etc/apt/keyrings/docker.gpg
+  
+  # Remover repositório antigo e adicionar novo
+  rm -f /etc/apt/sources.list.d/docker.list
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    ${UBUNTU_CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  
+  apt-get update -q
+  apt-get ${APT_FLAGS} install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  
+  systemctl start docker
+  systemctl enable docker
+EOF
+
+  if ! command -v docker &> /dev/null; then
+    log_error "Falha na instalação do Docker"
+    exit 1
+  fi
+
+  log_success "Docker $(docker --version) instalado"
+  sleep 2
+}
+
+system_snapd_install() {
+  print_banner
+  log_info "Instalando Snapd..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  APT_FLAGS="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+  
+  apt-get ${APT_FLAGS} install snapd
+  systemctl enable snapd
+  systemctl start snapd
+  snap install core
+  snap refresh core
+EOF
+
+  log_success "Snapd instalado"
+  sleep 2
+}
+
+system_nginx_install() {
+  print_banner
+  log_info "Instalando Nginx..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  APT_FLAGS="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+  
+  apt-get ${APT_FLAGS} install nginx
+  
+  # Remover configuração padrão
+  rm -f /etc/nginx/sites-enabled/default
+  
+  systemctl enable nginx
+  systemctl start nginx
+EOF
+
+  log_success "Nginx $(nginx -v 2>&1 | cut -d'/' -f2) instalado"
+  sleep 2
+}
+
+system_certbot_install() {
+  print_banner
+  log_info "Instalando Certbot..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  APT_FLAGS="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+  
+  # Remover certbot do apt se existir
+  apt-get ${APT_FLAGS} remove certbot 2>/dev/null || true
+  
+  # Instalar via snap (recomendado para Ubuntu 22.04/24.04)
+  snap install --classic certbot
+  ln -sf /snap/bin/certbot /usr/bin/certbot
+  
+  # Verificar instalação
+  certbot --version
+EOF
+
+  log_success "Certbot instalado"
+  sleep 2
+}
+
+system_nginx_conf() {
+  print_banner
+  log_info "Configurando Nginx..."
+  sleep 2
+
+  sudo su - root <<'EOF'
+  export DEBIAN_FRONTEND=noninteractive
+  
+  # Remover arquivo antigo se existir
+  rm -f /etc/nginx/conf.d/deploy.conf
+  
+  # Configuracao sem gzip duplicado
+  cat > /etc/nginx/conf.d/deploy.conf << 'END'
+# Configurações de upload e timeout
+client_max_body_size 100M;
+client_body_timeout 300s;
+client_header_timeout 300s;
+keepalive_timeout 300s;
+send_timeout 300s;
+proxy_connect_timeout 300s;
+proxy_send_timeout 300s;
+proxy_read_timeout 300s;
+END
+
+  # Testar configuração antes de aplicar
+  nginx -t
+EOF
+
+  log_success "Nginx configurado"
+  sleep 2
+}
+
+system_nginx_restart() {
+  print_banner
+  log_info "Reiniciando Nginx..."
+  sleep 2
+
+  sudo systemctl restart nginx
+  log_success "Nginx reiniciado"
+  sleep 2
+}
+
+system_certbot_setup() {
+  print_banner
+  log_info "Configurando SSL com Certbot..."
+  sleep 2
+
+  backend_domain=$(echo "${backend_url}" | sed 's|https://||')
+  frontend_domain=$(echo "${frontend_url}" | sed 's|https://||')
+
+  sudo certbot -m "${DEPLOY_EMAIL}" \
+    --nginx \
+    --agree-tos \
+    --non-interactive \
+    --domains "${backend_domain},${frontend_domain}"
+
+  log_success "SSL configurado"
+  sleep 2
+}
+
+system_create_folder() {
+  print_banner
+  log_info "Criando pasta da instância..."
+  sleep 2
+
+  sudo su - deploy <<EOF 
+  mkdir -p ${instancia_add}
+EOF
+
+  log_success "Pasta criada"
+  sleep 2
+}
+
+system_mv_folder() {
+  print_banner
+  log_info "Copiando código WhatIcket..."
+  sleep 2
+
+  sudo cp "${PROJECT_ROOT}"/whaticket.zip /home/deploy/${instancia_add}/
+  log_success "Código copiado"
+  sleep 2
+}
+
+system_unzip_whaticket() {
+  print_banner
+  log_info "Extraindo WhatIcket..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  cd /home/deploy/${instancia_add}
+  unzip -q whaticket.zip
+EOF
+
+  log_success "WhatIcket extraído"
+  sleep 2
+}
+
+# ============================================================================
+# FUNÇÕES DO BACKEND
+# ============================================================================
+
+backend_redis_create() {
+  print_banner
+  log_info "Criando Redis e Banco PostgreSQL ${POSTGRES_VERSION}..."
+  sleep 2
+
+  if [ -z "${redis_port}" ] || [ -z "${redis_pass}" ] || [ -z "${instancia_add}" ]; then
+    log_error "Variáveis Redis não definidas!"
+    exit 1
+  fi
+
+  sudo su - root <<EOF
+  usermod -aG docker deploy
+  
+  # Criar Redis com Docker
+  docker run --name redis-${instancia_add} \
+    -p ${redis_port}:6379 \
+    --restart always \
+    --detach redis:latest \
+    redis-server --requirepass ${redis_pass}
+EOF
+
+  sleep 5
+
+  if ! docker ps | grep -q "redis-${instancia_add}"; then
+    log_error "Redis não iniciou"
+    docker logs "redis-${instancia_add}" 2>/dev/null || true
+    exit 1
+  fi
+
+  log_success "Redis rodando na porta ${redis_port}"
+
+  # Criar banco PostgreSQL
+  sudo -u postgres bash <<EOSQL
+    createdb ${instancia_add};
+    psql -c "CREATE USER ${instancia_add} WITH SUPERUSER PASSWORD '${DB_PASS}';"
+EOSQL
+
+  log_success "Banco PostgreSQL 16 criado"
+  sleep 2
+}
+
+backend_set_env() {
+  print_banner
+  log_info "Configurando variáveis de ambiente (backend)..."
+  sleep 2
+
+  backend_url=$(echo "${backend_url}" | sed 's|https://||' | sed 's|/.*||')
+  backend_url="https://${backend_url}"
+  
+  frontend_url=$(echo "${frontend_url}" | sed 's|https://||' | sed 's|/.*||')
+  frontend_url="https://${frontend_url}"
+
+  sudo su - deploy <<EOF
+  cat > /home/deploy/${instancia_add}/backend/.env << 'ENVEOF'
+NODE_ENV=
+BACKEND_URL=${backend_url}
+FRONTEND_URL=${frontend_url}
+PROXY_PORT=443
+PORT=${backend_port}
+
+DB_HOST=localhost
+DB_DIALECT=postgres
+DB_PORT=5432
+DB_USER=${instancia_add}
+DB_PASS=${DB_PASS}
+DB_NAME=${instancia_add}
+
+JWT_SECRET=${JWT_SECRET}
+JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+
+REDIS_URI=redis://:${redis_pass}@127.0.0.1:${redis_port}
+REDIS_OPT_LIMITER_MAX=1
+REGIS_OPT_LIMITER_DURATION=3000
+
+USER_LIMIT=${max_user}
+CONNECTIONS_LIMIT=${max_whats}
+CLOSED_SEND_BY_ME=true
+ENVEOF
+EOF
+
+  if ! grep -q "REDIS_URI=redis://:${redis_pass}@127.0.0.1:${redis_port}" "/home/deploy/${instancia_add}/backend/.env"; then
+    log_error "Arquivo .env não configurado corretamente"
+    exit 1
+  fi
+
+  log_success "Variáveis de ambiente configuradas"
+  sleep 2
+}
+
+backend_node_dependencies() {
+  print_banner
+  log_info "Instalando dependências do backend (otimizado para Node 20)..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="\$NVM_DIR/versions/node/\$(nvm version 20)/bin:\$PATH"
+  cd /home/deploy/${instancia_add}/backend
+  
+  # Limpar cache do npm
+  npm cache clean --force
+  
+  # Instalar dependencias com configuracoes estaveis
+  npm install --legacy-peer-deps --no-audit --no-fund
+  npm install @adiwajshing/keyed-db --legacy-peer-deps
+  npm install @google/generative-ai --legacy-peer-deps
+EOF
+
+  log_success "Dependências instaladas (incluindo Gemini AI)"
+  sleep 2
+}
+
+backend_node_build() {
+  print_banner
+  log_info "Compilando backend..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="\$NVM_DIR/versions/node/\$(nvm version 20)/bin:\$PATH"
+  cd /home/deploy/${instancia_add}/backend
+  npm run build
+EOF
+
+  log_success "Backend compilado"
+  sleep 2
+}
+
+backend_db_migrate() {
+  print_banner
+  log_info "Executando migrations do banco PostgreSQL 16..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="\$NVM_DIR/versions/node/\$(nvm version 20)/bin:\$PATH"
+  cd /home/deploy/${instancia_add}/backend
+
+  echo "🔧 Garantindo coluna 'lid' na tabela Contacts..."
+  psql "\$DB_DIALECT://\$DB_USER:\$DB_PASS@\$DB_HOST:\$DB_PORT/\$DB_NAME" <<'SQL'
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_name = 'Contacts'
+      AND column_name = 'lid'
+    ) THEN
+      ALTER TABLE "Contacts" ADD COLUMN "lid" VARCHAR(255);
+    END IF;
+  END
+  \$\$;
+SQL
+
+  npx sequelize db:migrate
+  npx sequelize db:migrate
+EOF
+
+  log_success "Migrations aplicadas"
+  sleep 2
+}
+
+backend_db_seed() {
+  print_banner
+  log_info "Executando seeds do banco..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="\$NVM_DIR/versions/node/\$(nvm version 20)/bin:\$PATH"
+  cd /home/deploy/${instancia_add}/backend
+  npx sequelize db:seed:all
+EOF
+
+  log_success "Seeds aplicados"
+  sleep 2
+}
+
+backend_start_pm2() {
+  print_banner
+  log_info "Iniciando backend com PM2..."
+  sleep 2
+
+  sudo su - root <<EOF
+  cd /home/deploy/${instancia_add}/backend
+  pm2 start dist/server.js --name ${instancia_add}-backend
+  pm2 save --force
+EOF
+
+  log_success "Backend iniciado"
+  sleep 2
+}
+
+backend_nginx_setup() {
+  print_banner
+  log_info "Configurando Nginx (backend)..."
+  sleep 2
+
+  backend_hostname=$(echo "${backend_url}" | sed 's|https://||')
+
+  sudo su - root <<EOF
+  cat > /etc/nginx/sites-available/${instancia_add}-backend << 'END'
+server {
+  server_name ${backend_hostname};
+  
+  location / {
+    proxy_pass http://127.0.0.1:${backend_port};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_cache_bypass \$http_upgrade;
+    
+    # Timeouts aumentados
+    proxy_connect_timeout 300s;
+    proxy_send_timeout 300s;
+    proxy_read_timeout 300s;
+  }
+}
+END
+  ln -sf /etc/nginx/sites-available/${instancia_add}-backend /etc/nginx/sites-enabled/
+EOF
+
+  log_success "Nginx configurado (backend)"
+  sleep 2
+}
+
+# ============================================================================
+# FUNÇÕES DO FRONTEND
+# ============================================================================
+
+frontend_set_env() {
+  print_banner
+  log_info "Configurando variáveis de ambiente (frontend)..."
+  sleep 2
+
+  backend_url=$(echo "${backend_url}" | sed 's|https://||' | sed 's|/.*||')
+  backend_url="https://${backend_url}"
+
+  sudo su - deploy <<EOF
+  cat > /home/deploy/${instancia_add}/frontend/.env << 'ENVEOF'
+REACT_APP_BACKEND_URL=${backend_url}
+REACT_APP_HOURS_CLOSE_TICKETS_AUTO=24
+REACT_APP_SUPPORT_WHATSAPP=5527996716613
+GENERATE_SOURCEMAP=false
+ENVEOF
+
+  cat > /home/deploy/${instancia_add}/frontend/server.js << 'SERVEREOF'
+const express = require("express");
+const path = require("path");
+const app = express();
+app.use(express.static(path.join(__dirname, "build")));
+app.get("/*", function (req, res) {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+app.listen(${frontend_port});
+SERVEREOF
+EOF
+
+  log_success "Variáveis de ambiente configuradas (frontend)"
+  sleep 2
+}
+
+frontend_node_dependencies() {
+  print_banner
+  log_info "Instalando dependências do frontend..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="\$NVM_DIR/versions/node/\$(nvm version 20)/bin:\$PATH"
+  cd /home/deploy/${instancia_add}/frontend
+  
+  # Limpar cache
+  npm cache clean --force
+  
+  # Instalar dependências
+  npm install --force --no-audit --no-fund
+EOF
+
+  log_success "Dependências instaladas (frontend)"
+  sleep 2
+}
+
+frontend_node_build() {
+  print_banner
+  log_info "Compilando frontend..."
+  sleep 2
+
+  swap_mem=$(free -m | awk 'NR==3{printf "%.0f", $2}')
+  total_mem=$(free -m | awk 'NR==2{printf "%.0f", $2}')
+  
+  if [ "$swap_mem" -eq 0 ] && [ "$total_mem" -lt 8192 ]; then
+    log_warning "Configurando swap para evitar travamento..."
+    sudo fallocate -l 6G /swapfile 2>/dev/null || true
+    sudo chmod 600 /swapfile 2>/dev/null || true
+    sudo mkswap /swapfile 2>/dev/null || true
+    sudo swapon /swapfile 2>/dev/null || true
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null || true
+    log_success "Swap configurado"
+  fi
+
+  log_info "Liberando memória para build..."
+  sudo systemctl stop apache2 2>/dev/null || true
+  sudo systemctl stop mysql 2>/dev/null || true
+  sudo sync && sudo sysctl vm.drop_caches=3 2>/dev/null || true
+
+  sudo su - deploy <<EOF
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+  nvm use 20 >/dev/null
+  export PATH="\$NVM_DIR/versions/node/\$(nvm version 20)/bin:\$PATH"
+  cd /home/deploy/${instancia_add}/frontend
+  rm -rf build node_modules/.cache .eslintcache
+  
+  # Build otimizado para Node 20
+  NODE_OPTIONS="--max-old-space-size=2048" \
+  GENERATE_SOURCEMAP=false \
+  INLINE_RUNTIME_CHUNK=false \
+  IMAGE_INLINE_SIZE_LIMIT=0 \
+  ESLint_NO_DEV_ERRORS=true \
+  FAST_REFRESH=false \
+  CI=true \
+  DISABLE_ESLINT_PLUGIN=true \
+  TSC_COMPILE_ON_ERROR=true \
+  npm run build --silent 2>/dev/null || npm run build 2>&1 | grep -v "WARNING\|warning\|deprecated" || true
+EOF
+
+  build_exit_code=$?
+
+  sudo systemctl start nginx 2>/dev/null || true
+  sudo systemctl start mysql 2>/dev/null || true
+
+  if [ $build_exit_code -ne 0 ]; then
+    log_error "Build falhou"
+    exit 1
+  fi
+
+  log_success "Frontend compilado"
+  sleep 2
+}
+
+frontend_start_pm2() {
+  print_banner
+  log_info "Iniciando frontend com PM2..."
+  sleep 2
+
+  sudo su - root <<EOF
+  cd /home/deploy/${instancia_add}/frontend
+  pm2 start server.js --name ${instancia_add}-frontend
+  pm2 save --force
+  pm2 startup
+  PM2_BIN=\$(command -v pm2)
+  env PATH=\$PATH:/usr/local/bin "\$PM2_BIN" startup systemd -u deploy --hp /home/deploy
+EOF
+
+  log_success "Frontend iniciado"
+  sleep 2
+}
+
+frontend_nginx_setup() {
+  print_banner
+  log_info "Configurando Nginx (frontend)..."
+  sleep 2
+
+  frontend_hostname=$(echo "${frontend_url}" | sed 's|https://||')
+
+  sudo su - root <<EOF
+  cat > /etc/nginx/sites-available/${instancia_add}-frontend << 'END'
+server {
+  server_name ${frontend_hostname};
+  
+  location / {
+    proxy_pass http://127.0.0.1:${frontend_port};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_cache_bypass \$http_upgrade;
+    
+    # Timeouts aumentados
+    proxy_connect_timeout 300s;
+    proxy_send_timeout 300s;
+    proxy_read_timeout 300s;
+  }
+}
+END
+  ln -sf /etc/nginx/sites-available/${instancia_add}-frontend /etc/nginx/sites-enabled/
+EOF
+
+  log_success "Nginx configurado (frontend)"
+  sleep 2
+}
+
+# ============================================================================
+# FUNÇÕES DE GERENCIAMENTO
+# ============================================================================
+
+deletar_tudo() {
+  print_banner
+  log_warning "Deletando instância ${empresa_delete}..."
+  sleep 2
+
+  sudo su - root <<EOF
+  export DEBIAN_FRONTEND=noninteractive
+  docker container rm redis-${empresa_delete} --force 2>/dev/null || true
+  rm -rf /etc/nginx/sites-enabled/${empresa_delete}-frontend
+  rm -rf /etc/nginx/sites-enabled/${empresa_delete}-backend  
+  rm -rf /etc/nginx/sites-available/${empresa_delete}-frontend
+  rm -rf /etc/nginx/sites-available/${empresa_delete}-backend
+EOF
+
+  sudo -u postgres bash <<EOSQL
+  dropuser ${empresa_delete} 2>/dev/null || true
+  dropdb ${empresa_delete} 2>/dev/null || true
+EOSQL
+
+  sudo su - deploy <<EOF
+  rm -rf /home/deploy/${empresa_delete}
+  pm2 delete ${empresa_delete}-frontend ${empresa_delete}-backend 2>/dev/null || true
+  pm2 save
+EOF
+
+  log_success "Instância ${empresa_delete} removida"
+  sleep 2
+}
+
+configurar_bloqueio() {
+  print_banner
+  log_warning "Bloqueando instância ${empresa_bloquear}..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  pm2 stop ${empresa_bloquear}-backend
+  pm2 save
+EOF
+
+  log_success "Instância ${empresa_bloquear} bloqueada"
+  sleep 2
+}
+
+configurar_desbloqueio() {
+  print_banner
+  log_info "Desbloqueando instância ${empresa_desbloquear}..."
+  sleep 2
+
+  sudo su - deploy <<EOF
+  pm2 start ${empresa_desbloquear}-backend
+  pm2 save
+EOF
+
+  log_success "Instância ${empresa_desbloquear} desbloqueada"
+  sleep 2
+}
+
+configurar_dominio() {
+  print_banner
+  log_info "Alterando domínios da instância ${empresa_dominio}..."
+  sleep 2
+
+  sudo su - root <<EOF
+  export DEBIAN_FRONTEND=noninteractive
+  rm -rf /etc/nginx/sites-enabled/${empresa_dominio}-frontend
+  rm -rf /etc/nginx/sites-enabled/${empresa_dominio}-backend  
+  rm -rf /etc/nginx/sites-available/${empresa_dominio}-frontend
+  rm -rf /etc/nginx/sites-available/${empresa_dominio}-backend
+EOF
+
+  sudo su - deploy <<EOF
+  cd /home/deploy/${empresa_dominio}/frontend
+  sed -i "1c\REACT_APP_BACKEND_URL=https://${alter_backend_url}" .env
+  cd /home/deploy/${empresa_dominio}/backend
+  sed -i "2c\BACKEND_URL=https://${alter_backend_url}" .env
+  sed -i "3c\FRONTEND_URL=https://${alter_frontend_url}" .env 
+EOF
+
+  backend_hostname=$(echo "${alter_backend_url}" | sed 's|https://||')
+
+  sudo su - root <<EOF
+  export DEBIAN_FRONTEND=noninteractive
+  cat > /etc/nginx/sites-available/${empresa_dominio}-backend << 'END'
+server {
+  server_name ${backend_hostname};
+  
+  location / {
+    proxy_pass http://127.0.0.1:${alter_backend_port};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_cache_bypass \$http_upgrade;
+  }
+}
+END
+  ln -s /etc/nginx/sites-available/${empresa_dominio}-backend /etc/nginx/sites-enabled
+EOF
+
+  frontend_hostname=$(echo "${alter_frontend_url}" | sed 's|https://||')
+
+  sudo su - root <<EOF
+  export DEBIAN_FRONTEND=noninteractive
+  cat > /etc/nginx/sites-available/${empresa_dominio}-frontend << 'END'
+server {
+  server_name ${frontend_hostname};
+  
+  location / {
+    proxy_pass http://127.0.0.1:${alter_frontend_port};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_cache_bypass \$http_upgrade;
+  }
+}
+END
+  ln -s /etc/nginx/sites-available/${empresa_dominio}-frontend /etc/nginx/sites-enabled
+EOF
+
+  sudo systemctl restart nginx
+
+  backend_domain=$(echo "${alter_backend_url}" | sed 's|https://||')
+  frontend_domain=$(echo "${alter_frontend_url}" | sed 's|https://||')
+
+  sudo certbot -m "${DEPLOY_EMAIL}" \
+    --nginx \
+    --agree-tos \
+    --non-interactive \
+    --domains "${backend_domain},${frontend_domain}"
+
+  log_success "Domínios alterados para ${empresa_dominio}"
+  sleep 2
+}
+
+# ============================================================================
+# MENU PRINCIPAL
+# ============================================================================
+
+inquiry_options() {
+  print_banner
+  printf "${WHITE}💻 Bem-vindo ao WhatIcket SaaS - ${UBUNTU_EDITION} - Selecione uma opção:${GRAY_LIGHT}\n\n"
+  printf "   [1] Instalar WhatIcket SaaS\n"
+  printf "   [2] Deletar WhatIcket SaaS\n"
+  printf "   [3] Bloquear WhatIcket SaaS\n"
+  printf "   [4] Desbloquear WhatIcket SaaS\n"
+  printf "   [5] Alterar domínio WhatIcket SaaS\n"
+  printf "\n"
+  read -p "> " option
+
+  case "${option}" in
+    1) 
+      get_instancia_add
+      get_max_whats
+      get_max_user
+      get_frontend_url
+      get_backend_url
+      get_frontend_port
+      get_backend_port
+      get_redis_port
+      generate_redis_password
+      ;;
+    2) 
+      get_empresa_delete
+      deletar_tudo
+      exit 0
+      ;;
+    3) 
+      get_empresa_bloquear
+      configurar_bloqueio
+      exit 0
+      ;;
+    4) 
+      get_empresa_desbloquear
+      configurar_desbloqueio
+      exit 0
+      ;;
+    5) 
+      get_empresa_dominio
+      get_alter_frontend_url
+      get_alter_backend_url
+      get_alter_frontend_port
+      get_alter_backend_port
+      configurar_dominio
+      exit 0
+      ;;
+    *) 
+      log_error "Opção inválida"
+      exit 1
+      ;;
+  esac
+}
+
+# ============================================================================
+# FLUXO PRINCIPAL DE INSTALAÇÃO
+# ============================================================================
+
+main() {
+  # Reset shell colors
+  tput init
+
+  # Verificar versão do Ubuntu
+  check_ubuntu_version
+
+  # Criar arquivo de configuração se não existir
+  if [[ ! -e "${PROJECT_ROOT}"/config ]]; then
+    cat <<EOF > "${PROJECT_ROOT}"/config
+deploy_password=${DEPLOY_PASSWORD}
+db_pass=${DB_PASS}
+ubuntu_version=${UBUNTU_VERSION}
+EOF
+    sudo chown root:root "${PROJECT_ROOT}"/config 2>/dev/null || true
+    sudo chmod 700 "${PROJECT_ROOT}"/config 2>/dev/null || true
+  fi
+
+  # Menu interativo
+  inquiry_options
+
+  # Instalação das dependências do sistema
+  system_configure_noninteractive
+  system_update
+  system_node_install
+  system_pm2_install
+  
+  # Criar usuário ANTES do Docker
+  system_create_user
+  
+  system_docker_install
+  
+  # Adicionar usuário ao Docker DEPOIS de instalar
+  system_add_user_to_docker
+  
+  system_snapd_install
+  system_nginx_install
+  system_certbot_install
+
+  # Backend
+  system_create_folder
+  system_mv_folder
+  system_unzip_whaticket
+  backend_set_env
+  backend_redis_create
+  backend_node_dependencies
+  backend_node_build
+  backend_db_migrate
+  backend_db_seed
+  backend_start_pm2
+  backend_nginx_setup
+
+  # Frontend
+  frontend_set_env
+  frontend_node_dependencies
+  frontend_node_build
+  frontend_start_pm2
+  frontend_nginx_setup
+
+  # Configuração final
+  system_nginx_conf
+  system_nginx_restart
+  system_certbot_setup
+
+  # Mensagem final
+  print_banner
+  printf "${GREEN}"
+  printf "╔════════════════════════════════════════════════════════════╗\n"
+  printf "║         INSTALAÇÃO CONCLUÍDA COM SUCESSO!                  ║\n"
+  printf "║         ${UBUNTU_EDITION}                    ║\n"
+  printf "╚════════════════════════════════════════════════════════════╝\n"
+  printf "${NC}\n"
+  printf "${WHITE}📊 Informações da Instalação:${NC}\n\n"
+  printf "   ${CYAN_LIGHT}Instância:${NC} ${instancia_add}\n"
+  printf "   ${CYAN_LIGHT}Frontend:${NC} ${frontend_url}\n"
+  printf "   ${CYAN_LIGHT}Backend:${NC} ${backend_url}\n"
+  printf "   ${CYAN_LIGHT}Usuário Deploy:${NC} deploy\n"
+  printf "   ${CYAN_LIGHT}Senha Deploy:${NC} ${DEPLOY_PASSWORD}\n"
+  printf "   ${CYAN_LIGHT}Senha Redis:${NC} ${redis_pass}\n"
+  printf "   ${CYAN_LIGHT}Max WhatsApp:${NC} ${max_whats}\n"
+  printf "   ${CYAN_LIGHT}Max Usuários:${NC} ${max_user}\n"
+  printf "   ${CYAN_LIGHT}Node.js:${NC} $(node --version)\n"
+  printf "   ${CYAN_LIGHT}PostgreSQL:${NC} ${POSTGRES_VERSION}\n"
+  printf "   ${CYAN_LIGHT}Ubuntu:${NC} ${UBUNTU_EDITION}\n"
+  printf "\n"
+  printf "${YELLOW}⚠️  IMPORTANTE: Anote essas informações em local seguro!${NC}\n\n"
+  printf "${GREEN}✅ Acesse: ${frontend_url}${NC}\n"
+  printf "${GREEN}✅ Login padrão: admin@admin.com${NC}\n"
+  printf "${GREEN}✅ Senha padrão: 123456${NC}\n\n"
+  printf "${CYAN_LIGHT}🔧 Comandos úteis:${NC}\n"
+  printf "   ${WHITE}pm2 status${NC} - Ver status dos serviços\n"
+  printf "   ${WHITE}pm2 logs ${instancia_add}-backend${NC} - Ver logs do backend\n"
+  printf "   ${WHITE}pm2 logs ${instancia_add}-frontend${NC} - Ver logs do frontend\n"
+  printf "   ${WHITE}sudo systemctl status nginx${NC} - Status do Nginx\n"
+  printf "   ${WHITE}docker ps${NC} - Ver containers Redis rodando\n\n"
+}
+
+# Executar instalação
+main
