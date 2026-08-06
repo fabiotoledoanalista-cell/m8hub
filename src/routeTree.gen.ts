@@ -37,11 +37,11 @@ import { Route as DemoContatosRouteImport } from './routes/demo/contatos'
 import { Route as DemoConfiguracoesRouteImport } from './routes/demo/configuracoes'
 import { Route as DemoConexaoRouteImport } from './routes/demo/conexao'
 import { Route as DemoAgenteRouteImport } from './routes/demo/agente'
-import { Route as AppRespostasRapidasRouteImport } from './routes/app/respostas-rapidas'
-import { Route as AppManualRouteImport } from './routes/app/manual'
 import { Route as AppSupervisaoRouteImport } from './routes/app/supervisao'
+import { Route as AppRespostasRapidasRouteImport } from './routes/app/respostas-rapidas'
 import { Route as AppRelatoriosRouteImport } from './routes/app/relatorios'
 import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
+import { Route as AppManualRouteImport } from './routes/app/manual'
 import { Route as AppIntegracaoRouteImport } from './routes/app/integracao'
 import { Route as AppFollowupRouteImport } from './routes/app/followup'
 import { Route as AppFlowsRouteImport } from './routes/app/flows'
@@ -60,7 +60,9 @@ import { Route as AppAgenteRouteImport } from './routes/app/agente'
 import { Route as AppAgendadasRouteImport } from './routes/app/agendadas'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp-webhook'
 import { Route as ApiPublicGoogleCallbackRouteImport } from './routes/api/public/google-callback'
+import { Route as ApiCronSendNpsRouteImport } from './routes/api/cron/send-nps'
 import { Route as ApiCronFollowupDispatchRouteImport } from './routes/api/cron/followup-dispatch'
+import { Route as ApiCronCloseInactiveRouteImport } from './routes/api/cron/close-inactive'
 import { Route as ApiPublicBillingWebhookRouteImport } from './routes/api/public/billing/webhook'
 
 const TrocarSenhaRoute = TrocarSenhaRouteImport.update({
@@ -203,19 +205,14 @@ const DemoAgenteRoute = DemoAgenteRouteImport.update({
   path: '/agente',
   getParentRoute: () => DemoRoute,
 } as any)
-const AppRespostasRapidasRoute = AppRespostasRapidasRouteImport.update({
-  id: '/respostas-rapidas',
-  path: '/respostas-rapidas',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppManualRoute = AppManualRouteImport.update({
-  id: '/manual',
-  path: '/manual',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppSupervisaoRoute = AppSupervisaoRouteImport.update({
   id: '/supervisao',
   path: '/supervisao',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRespostasRapidasRoute = AppRespostasRapidasRouteImport.update({
+  id: '/respostas-rapidas',
+  path: '/respostas-rapidas',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
@@ -226,6 +223,11 @@ const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
 const AppOnboardingRoute = AppOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppManualRoute = AppManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
   getParentRoute: () => AppRoute,
 } as any)
 const AppIntegracaoRoute = AppIntegracaoRouteImport.update({
@@ -319,9 +321,19 @@ const ApiPublicGoogleCallbackRoute = ApiPublicGoogleCallbackRouteImport.update({
   path: '/api/public/google-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronSendNpsRoute = ApiCronSendNpsRouteImport.update({
+  id: '/api/cron/send-nps',
+  path: '/api/cron/send-nps',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronFollowupDispatchRoute = ApiCronFollowupDispatchRouteImport.update({
   id: '/api/cron/followup-dispatch',
   path: '/api/cron/followup-dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronCloseInactiveRoute = ApiCronCloseInactiveRouteImport.update({
+  id: '/api/cron/close-inactive',
+  path: '/api/cron/close-inactive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicBillingWebhookRoute = ApiPublicBillingWebhookRouteImport.update({
@@ -358,11 +370,11 @@ export interface FileRoutesByFullPath {
   '/app/flows': typeof AppFlowsRoute
   '/app/followup': typeof AppFollowupRoute
   '/app/integracao': typeof AppIntegracaoRoute
+  '/app/manual': typeof AppManualRoute
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/relatorios': typeof AppRelatoriosRoute
-  '/app/supervisao': typeof AppSupervisaoRoute
   '/app/respostas-rapidas': typeof AppRespostasRapidasRoute
-  '/app/manual': typeof AppManualRoute
+  '/app/supervisao': typeof AppSupervisaoRoute
   '/demo/agente': typeof DemoAgenteRoute
   '/demo/conexao': typeof DemoConexaoRoute
   '/demo/configuracoes': typeof DemoConfiguracoesRoute
@@ -380,7 +392,9 @@ export interface FileRoutesByFullPath {
   '/master/planos': typeof MasterPlanosRoute
   '/demo/': typeof DemoIndexRoute
   '/master/': typeof MasterIndexRoute
+  '/api/cron/close-inactive': typeof ApiCronCloseInactiveRoute
   '/api/cron/followup-dispatch': typeof ApiCronFollowupDispatchRoute
+  '/api/cron/send-nps': typeof ApiCronSendNpsRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
@@ -411,11 +425,11 @@ export interface FileRoutesByTo {
   '/app/flows': typeof AppFlowsRoute
   '/app/followup': typeof AppFollowupRoute
   '/app/integracao': typeof AppIntegracaoRoute
+  '/app/manual': typeof AppManualRoute
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/relatorios': typeof AppRelatoriosRoute
-  '/app/supervisao': typeof AppSupervisaoRoute
   '/app/respostas-rapidas': typeof AppRespostasRapidasRoute
-  '/app/manual': typeof AppManualRoute
+  '/app/supervisao': typeof AppSupervisaoRoute
   '/demo/agente': typeof DemoAgenteRoute
   '/demo/conexao': typeof DemoConexaoRoute
   '/demo/configuracoes': typeof DemoConfiguracoesRoute
@@ -433,7 +447,9 @@ export interface FileRoutesByTo {
   '/master/planos': typeof MasterPlanosRoute
   '/demo': typeof DemoIndexRoute
   '/master': typeof MasterIndexRoute
+  '/api/cron/close-inactive': typeof ApiCronCloseInactiveRoute
   '/api/cron/followup-dispatch': typeof ApiCronFollowupDispatchRoute
+  '/api/cron/send-nps': typeof ApiCronSendNpsRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
@@ -467,10 +483,11 @@ export interface FileRoutesById {
   '/app/flows': typeof AppFlowsRoute
   '/app/followup': typeof AppFollowupRoute
   '/app/integracao': typeof AppIntegracaoRoute
+  '/app/manual': typeof AppManualRoute
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/relatorios': typeof AppRelatoriosRoute
-  '/app/supervisao': typeof AppSupervisaoRoute
   '/app/respostas-rapidas': typeof AppRespostasRapidasRoute
+  '/app/supervisao': typeof AppSupervisaoRoute
   '/demo/agente': typeof DemoAgenteRoute
   '/demo/conexao': typeof DemoConexaoRoute
   '/demo/configuracoes': typeof DemoConfiguracoesRoute
@@ -488,7 +505,9 @@ export interface FileRoutesById {
   '/master/planos': typeof MasterPlanosRoute
   '/demo/': typeof DemoIndexRoute
   '/master/': typeof MasterIndexRoute
+  '/api/cron/close-inactive': typeof ApiCronCloseInactiveRoute
   '/api/cron/followup-dispatch': typeof ApiCronFollowupDispatchRoute
+  '/api/cron/send-nps': typeof ApiCronSendNpsRoute
   '/api/public/google-callback': typeof ApiPublicGoogleCallbackRoute
   '/api/public/whatsapp-webhook': typeof ApiPublicWhatsappWebhookRoute
   '/api/public/billing/webhook': typeof ApiPublicBillingWebhookRoute
@@ -523,10 +542,11 @@ export interface FileRouteTypes {
     | '/app/flows'
     | '/app/followup'
     | '/app/integracao'
+    | '/app/manual'
     | '/app/onboarding'
     | '/app/relatorios'
     | '/app/respostas-rapidas'
-    | '/app/manual'
+    | '/app/supervisao'
     | '/demo/agente'
     | '/demo/conexao'
     | '/demo/configuracoes'
@@ -544,7 +564,9 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/demo/'
     | '/master/'
+    | '/api/cron/close-inactive'
     | '/api/cron/followup-dispatch'
+    | '/api/cron/send-nps'
     | '/api/public/google-callback'
     | '/api/public/whatsapp-webhook'
     | '/api/public/billing/webhook'
@@ -575,9 +597,11 @@ export interface FileRouteTypes {
     | '/app/flows'
     | '/app/followup'
     | '/app/integracao'
+    | '/app/manual'
     | '/app/onboarding'
     | '/app/relatorios'
     | '/app/respostas-rapidas'
+    | '/app/supervisao'
     | '/demo/agente'
     | '/demo/conexao'
     | '/demo/configuracoes'
@@ -595,7 +619,9 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/demo'
     | '/master'
+    | '/api/cron/close-inactive'
     | '/api/cron/followup-dispatch'
+    | '/api/cron/send-nps'
     | '/api/public/google-callback'
     | '/api/public/whatsapp-webhook'
     | '/api/public/billing/webhook'
@@ -628,10 +654,11 @@ export interface FileRouteTypes {
     | '/app/flows'
     | '/app/followup'
     | '/app/integracao'
+    | '/app/manual'
     | '/app/onboarding'
     | '/app/relatorios'
     | '/app/respostas-rapidas'
-    | '/app/manual'
+    | '/app/supervisao'
     | '/demo/agente'
     | '/demo/conexao'
     | '/demo/configuracoes'
@@ -649,7 +676,9 @@ export interface FileRouteTypes {
     | '/master/planos'
     | '/demo/'
     | '/master/'
+    | '/api/cron/close-inactive'
     | '/api/cron/followup-dispatch'
+    | '/api/cron/send-nps'
     | '/api/public/google-callback'
     | '/api/public/whatsapp-webhook'
     | '/api/public/billing/webhook'
@@ -667,7 +696,9 @@ export interface RootRouteChildren {
   ResetSenhaRoute: typeof ResetSenhaRoute
   TermosRoute: typeof TermosRoute
   TrocarSenhaRoute: typeof TrocarSenhaRoute
+  ApiCronCloseInactiveRoute: typeof ApiCronCloseInactiveRoute
   ApiCronFollowupDispatchRoute: typeof ApiCronFollowupDispatchRoute
+  ApiCronSendNpsRoute: typeof ApiCronSendNpsRoute
   ApiPublicGoogleCallbackRoute: typeof ApiPublicGoogleCallbackRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
   ApiPublicBillingWebhookRoute: typeof ApiPublicBillingWebhookRoute
@@ -871,18 +902,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoAgenteRouteImport
       parentRoute: typeof DemoRoute
     }
+    '/app/supervisao': {
+      id: '/app/supervisao'
+      path: '/supervisao'
+      fullPath: '/app/supervisao'
+      preLoaderRoute: typeof AppSupervisaoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/respostas-rapidas': {
       id: '/app/respostas-rapidas'
       path: '/respostas-rapidas'
       fullPath: '/app/respostas-rapidas'
       preLoaderRoute: typeof AppRespostasRapidasRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/manual': {
-      id: '/app/manual'
-      path: '/manual'
-      fullPath: '/app/manual'
-      preLoaderRoute: typeof AppManualRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/relatorios': {
@@ -892,18 +923,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRelatoriosRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/supervisao': {
-      id: '/app/supervisao'
-      path: '/supervisao'
-      fullPath: '/app/supervisao'
-      preLoaderRoute: typeof AppSupervisaoRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/onboarding': {
       id: '/app/onboarding'
       path: '/onboarding'
       fullPath: '/app/onboarding'
       preLoaderRoute: typeof AppOnboardingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/manual': {
+      id: '/app/manual'
+      path: '/manual'
+      fullPath: '/app/manual'
+      preLoaderRoute: typeof AppManualRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/integracao': {
@@ -1032,11 +1063,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGoogleCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/send-nps': {
+      id: '/api/cron/send-nps'
+      path: '/api/cron/send-nps'
+      fullPath: '/api/cron/send-nps'
+      preLoaderRoute: typeof ApiCronSendNpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cron/followup-dispatch': {
       id: '/api/cron/followup-dispatch'
       path: '/api/cron/followup-dispatch'
       fullPath: '/api/cron/followup-dispatch'
       preLoaderRoute: typeof ApiCronFollowupDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/close-inactive': {
+      id: '/api/cron/close-inactive'
+      path: '/api/cron/close-inactive'
+      fullPath: '/api/cron/close-inactive'
+      preLoaderRoute: typeof ApiCronCloseInactiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/billing/webhook': {
@@ -1066,11 +1111,11 @@ interface AppRouteChildren {
   AppFlowsRoute: typeof AppFlowsRoute
   AppFollowupRoute: typeof AppFollowupRoute
   AppIntegracaoRoute: typeof AppIntegracaoRoute
+  AppManualRoute: typeof AppManualRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
-  AppSupervisaoRoute: typeof AppSupervisaoRoute
   AppRespostasRapidasRoute: typeof AppRespostasRapidasRoute
-  AppManualRoute: typeof AppManualRoute
+  AppSupervisaoRoute: typeof AppSupervisaoRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -1090,11 +1135,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppFlowsRoute: AppFlowsRoute,
   AppFollowupRoute: AppFollowupRoute,
   AppIntegracaoRoute: AppIntegracaoRoute,
+  AppManualRoute: AppManualRoute,
   AppOnboardingRoute: AppOnboardingRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
-  AppSupervisaoRoute: AppSupervisaoRoute,
   AppRespostasRapidasRoute: AppRespostasRapidasRoute,
-  AppManualRoute: AppManualRoute,
+  AppSupervisaoRoute: AppSupervisaoRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -1162,7 +1207,9 @@ const rootRouteChildren: RootRouteChildren = {
   ResetSenhaRoute: ResetSenhaRoute,
   TermosRoute: TermosRoute,
   TrocarSenhaRoute: TrocarSenhaRoute,
+  ApiCronCloseInactiveRoute: ApiCronCloseInactiveRoute,
   ApiCronFollowupDispatchRoute: ApiCronFollowupDispatchRoute,
+  ApiCronSendNpsRoute: ApiCronSendNpsRoute,
   ApiPublicGoogleCallbackRoute: ApiPublicGoogleCallbackRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
   ApiPublicBillingWebhookRoute: ApiPublicBillingWebhookRoute,
