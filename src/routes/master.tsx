@@ -79,7 +79,7 @@ function MasterLayout() {
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-3 bg-[color:var(--panel)]/80 backdrop-blur-xl border-b border-[color:var(--hairline)]">
         <div className="flex items-center gap-2.5 min-w-0">
-          <img src="/logo-TGestCRM.png" alt="TGestCRM" className="h-8 w-auto object-contain shrink-0" />
+          <span className="font-display font-bold text-[14.5px]">{brand.name}</span>
           <div className="text-[10.5px] text-muted-foreground truncate">admin · master</div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -97,7 +97,7 @@ function MasterLayout() {
       <div className="flex flex-1 flex-col md:flex-row">
         <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
           <div className="px-5 py-5 flex items-center gap-3 border-b border-[color:var(--hairline)]">
-            <img src="/logo-TGestCRM.png" alt="TGestCRM" className="h-10 w-auto object-contain" />
+            <span className="font-display font-extrabold text-[16px]">{brand.name}</span>
             <div className="text-[11px] text-muted-foreground">admin · master</div>
           </div>
 

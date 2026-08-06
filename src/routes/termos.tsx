@@ -1,10 +1,11 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/termos")({
   head: () => ({
     meta: [
-      { title: "Termos e Condições — TGestCRM" },
-      { name: "description", content: "Termos e Condições de uso do TGestCRM." },
+      { title: `Termos e Condições — ${brand.name}` },
+      { name: "description", content: `Termos e Condições de uso do ${brand.name}.` },
     ],
   }),
   component: TermosPage,
@@ -22,8 +23,8 @@ function TermosPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">1. Quem somos</h2>
             <p className="mt-2">
-              Estes Termos regulam o uso do serviço TGestCRM ("Serviço"), fornecido por
-              <strong> TGestCRM</strong> ("nós", "nosso"). Ao usar o Serviço, você concorda com
+              Estes Termos regulam o uso do serviço {brand.name} ("Serviço"), fornecido por
+              <strong> {brand.name}</strong> ("nós", "nosso"). Ao usar o Serviço, você concorda com
               estes Termos. Se não concordar, não utilize o Serviço.
             </p>
           </section>
@@ -40,7 +41,7 @@ function TermosPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">3. Descrição do Serviço</h2>
             <p className="mt-2">
-              O TGestCRM oferece automação e gestão de atendimento via WhatsApp, incluindo
+              O {brand.name} oferece automação e gestão de atendimento via WhatsApp, incluindo
               recursos de mensageria, fluxos automatizados e integrações.
             </p>
           </section>
@@ -61,7 +62,7 @@ function TermosPage() {
             <h2 className="text-xl font-semibold text-slate-900">5. Propriedade intelectual</h2>
             <p className="mt-2">
               Todo o software, marca, documentação e materiais do Serviço são de propriedade
-              do TGestCRM. Concedemos a você uma licença limitada, não exclusiva e
+              do {brand.name}. Concedemos a você uma licença limitada, não exclusiva e
               intransferível para usar o Serviço conforme o plano contratado.
             </p>
           </section>
@@ -118,7 +119,7 @@ function TermosPage() {
             <h2 className="text-xl font-semibold text-slate-900">11. Lei aplicável</h2>
             <p className="mt-2">
               Estes Termos são regidos pelas leis do Brasil. Fica eleito o foro do domicílio
-              do TGestCRM para dirimir controvérsias, salvo disposição legal em contrário.
+              do {brand.name} para dirimir controvérsias, salvo disposição legal em contrário.
             </p>
           </section>
 

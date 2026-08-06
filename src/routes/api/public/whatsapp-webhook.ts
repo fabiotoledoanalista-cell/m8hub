@@ -447,7 +447,7 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
           return new Response("error", { status: 200 });
         }
       },
-      GET: async () => new Response("TGestCRM webhook online", { status: 200 }),
+      GET: async () => new Response("M8HUB webhook online", { status: 200 }),
     },
   },
 });

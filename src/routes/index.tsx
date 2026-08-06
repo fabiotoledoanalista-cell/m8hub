@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Conecte seu número de WhatsApp em 2 minutos. A IA do TGestCRM responde, qualifica e move cada lead no funil automaticamente. 3 dias grátis para testar.",
+          `Conecte seu número de WhatsApp em 2 minutos. A IA do ${brand.name} responde, qualifica e move cada lead no funil automaticamente. 3 dias grátis para testar.`,
       },
       { property: "og:title", content: `${brand.name} — WhatsApp + IA + CRM no automático` },
       {
@@ -288,7 +288,7 @@ function Header({
     <header className="lp-header sticky top-0 z-50 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-5 md:px-8 h-[4.5rem] md:h-20 flex items-center justify-between gap-3">
         <a href="/" className="flex items-center gap-2.5">
-          <img src="/logo-TGestCRM.png" alt="TGestCRM" className="h-16 md:h-20 w-auto object-contain" />
+          <span className="font-display font-extrabold text-2xl md:text-[26px] text-white">{brand.name}</span>
         </a>
         <nav className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-white/70">
           <a href="#como" className="hover:text-white transition">Como funciona</a>
@@ -404,7 +404,7 @@ function PhoneMock() {
               A
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold truncate">TGestCRM · Agente IA</div>
+              <div className="text-sm font-semibold truncate">{brand.name} · Agente IA</div>
               <div className="text-[10px] text-[#25D366] flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full bg-[#25D366]" /> online agora
               </div>
@@ -518,7 +518,7 @@ function Pain() {
         </h2>
         <p className="mt-6 text-lg md:text-xl text-white/65 leading-relaxed">
           A primeira empresa a responder vende. Sempre. Enquanto você está dirigindo, atendendo na loja
-          ou dormindo, os leads do anúncio que você pagou estão sumindo na fila. O TGestCRM responde
+          ou dormindo, os leads do anúncio que você pagou estão sumindo na fila. O {brand.name} responde
           em segundos via WhatsApp, qualifica automaticamente e já entrega o lead pronto pra fechar.
         </p>
       </div>
@@ -834,7 +834,7 @@ function Footer() {
         <div className="grid gap-10 md:gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
-              <img src="/logo-TGestCRM.png" alt="TGestCRM" className="h-10 w-auto object-contain" />
+              <span className="font-display font-extrabold text-xl text-white">{brand.name}</span>
             </div>
             <p className="mt-4 text-sm text-white/55 leading-relaxed max-w-xs">
               O CRM brasileiro com WhatsApp nativo, agente IA e pipeline Kanban para PMEs.

@@ -1,9 +1,10 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/reembolso")({
   head: () => ({
     meta: [
-      { title: "Política de Reembolso — TGestCRM" },
+      { title: `Política de Reembolso — ${brand.name}` },
       { name: "description", content: "Garantia de 30 dias. Saiba como solicitar reembolso." },
     ],
   }),
@@ -22,7 +23,7 @@ function ReembolsoPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">Garantia de 30 dias</h2>
             <p className="mt-2">
-              O <strong>TGestCRM</strong> oferece uma garantia de satisfação de
+              O <strong>{brand.name}</strong> oferece uma garantia de satisfação de
               <strong> 30 dias</strong>. Se você não estiver satisfeito com sua compra, pode
               solicitar reembolso integral em até 30 dias a partir da data do pedido.
             </p>

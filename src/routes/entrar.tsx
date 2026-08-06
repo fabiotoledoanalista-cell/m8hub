@@ -160,7 +160,7 @@ function EntrarPage() {
 
           <div className="space-y-8 max-w-lg">
             <div className="flex items-center gap-3">
-              <img src="/logo-TGestCRM.png" alt="TGestCRM" className="h-14 w-auto object-contain" />
+              <span className="font-display font-extrabold text-2xl">{brand.name}</span>
             </div>
 
             <h1 className="font-display text-4xl xl:text-5xl font-extrabold leading-[1.05] tracking-tight">
@@ -198,7 +198,7 @@ function EntrarPage() {
             <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="size-4" /> voltar
             </Link>
-            <img src="/logo-TGestCRM.png" alt="TGestCRM" className="h-10 w-auto object-contain" />
+            <span className="font-display font-extrabold text-lg">{brand.name}</span>
           </div>
 
           <div className="w-full max-w-md">

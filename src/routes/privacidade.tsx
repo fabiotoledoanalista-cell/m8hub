@@ -1,10 +1,11 @@
 ﻿import { createFileRoute, Link } from "@tanstack/react-router";
+import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade — TGestCRM" },
-      { name: "description", content: "Como o TGestCRM coleta, usa e protege seus dados." },
+      { title: `Política de Privacidade — ${brand.name}` },
+      { name: "description", content: `Como o ${brand.name} coleta, usa e protege seus dados.` },
     ],
   }),
   component: PrivacidadePage,
@@ -22,7 +23,7 @@ function PrivacidadePage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">1. Controlador dos dados</h2>
             <p className="mt-2">
-              <strong>TGestCRM</strong> atua como controlador dos dados pessoais tratados
+              <strong>{brand.name}</strong> atua como controlador dos dados pessoais tratados
               no âmbito do Serviço, conforme a LGPD (Lei nº 13.709/2018) e demais leis
               aplicáveis.
             </p>

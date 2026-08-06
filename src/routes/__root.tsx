@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { supportWhatsappUrl, supportWhatsappDisplay } from "@/config/brand";
+import { brand, supportWhatsappUrl, supportWhatsappDisplay } from "@/config/brand";
 
 function NotFoundComponent() {
   return (
@@ -91,15 +91,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TGestCRM — O CRM brasileiro com WhatsApp nativo" },
+      { title: `${brand.name} — O CRM brasileiro com WhatsApp nativo` },
       { name: "description", content: "CRM completo com WhatsApp nativo, agente IA e pipeline Kanban para PMEs brasileiras." },
       { name: "author", content: "ToledoTech" },
-      { property: "og:title", content: "TGestCRM — O CRM brasileiro com WhatsApp nativo" },
+      { property: "og:title", content: `${brand.name} — O CRM brasileiro com WhatsApp nativo` },
       { property: "og:description", content: "CRM completo com WhatsApp nativo, agente IA e pipeline Kanban para PMEs brasileiras." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@ToledoTech" },
-      { name: "twitter:title", content: "TGestCRM — O CRM brasileiro com WhatsApp nativo" },
+      { name: "twitter:title", content: `${brand.name} — O CRM brasileiro com WhatsApp nativo` },
       { name: "twitter:description", content: "CRM completo com WhatsApp nativo, agente IA e pipeline Kanban para PMEs brasileiras." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/063e785c-e670-4910-86a1-b0bb141f6a96/id-preview-36807bb7--be429179-e739-4302-b8f8-67595d55c75d.lovable.app-1781545525627.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/063e785c-e670-4910-86a1-b0bb141f6a96/id-preview-36807bb7--be429179-e739-4302-b8f8-67595d55c75d.lovable.app-1781545525627.png" },

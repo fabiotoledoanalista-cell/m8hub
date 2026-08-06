@@ -105,7 +105,7 @@ function IntegracaoPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">Integrações & API</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Conecte o TGestCRM com seus outros sistemas</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Conecte o {brand.name} com seus outros sistemas</p>
       </div>
 
       <div className="flex gap-1 p-1 rounded-xl bg-[color:var(--panel-2)] w-fit">
@@ -122,7 +122,7 @@ function IntegracaoPage() {
       ) : tab === "api" ? (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">Use as chaves para autenticar requisições à API do TGestCRM</p>
+            <p className="text-sm text-muted-foreground">Use as chaves para autenticar requisições à API do {brand.name}</p>
             <Button onClick={() => setNewKeyModal(true)} className="bg-gradient-brand text-primary-foreground">
               <Plus className="size-4 mr-2" /> Nova chave
             </Button>
