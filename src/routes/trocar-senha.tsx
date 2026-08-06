@@ -22,7 +22,7 @@ function Page() {
 
   useEffect(() => {
     void supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) navigate({ to: "/entrar", replace: true });
+      if (!data.user) navigate({ to: "/entrar", search: { modo: "login" }, replace: true });
       else setUserId(data.user.id);
     });
   }, [navigate]);

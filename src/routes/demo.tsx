@@ -139,7 +139,7 @@ function DemoLayout() {
                 <div className="text-[13.5px] font-semibold truncate">Visitante</div>
                 <div className="text-[11px] text-muted-foreground truncate">Modo demo</div>
               </div>
-              <Link to="/entrar" title="Entrar" className="size-8 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[color:var(--panel)]">
+              <Link to="/entrar" search={{ modo: "login" }} title="Entrar" className="size-8 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[color:var(--panel)]">
                 <LogIn className="size-4" />
               </Link>
             </div>

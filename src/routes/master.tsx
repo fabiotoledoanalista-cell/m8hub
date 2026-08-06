@@ -9,7 +9,7 @@ export const Route = createFileRoute("/master")({
   ssr: false,
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) throw redirect({ to: "/entrar" });
+    if (!u.user) throw redirect({ to: "/entrar", search: { modo: "login" } });
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
     const isSuper = (roles ?? []).some((r: any) => r.role === "super_admin");
     if (!isSuper) {
@@ -85,7 +85,7 @@ function MasterLayout() {
         <div className="flex items-center gap-1.5 shrink-0">
           <ThemeToggle />
           <button
-            onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar?modo=login"; }}
             title="Sair"
             className="size-9 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground"
           >
@@ -156,7 +156,7 @@ function MasterLayout() {
                 <div className="text-[11px] truncate" style={{ color: RED }}>Super admin</div>
               </div>
               <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}
+                onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar?modo=login"; }}
                 title="Sair"
                 className="size-8 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[color:var(--panel)]"
               >

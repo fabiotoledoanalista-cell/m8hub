@@ -16,7 +16,7 @@ export const Route = createFileRoute("/app")({
   ssr: false,
   beforeLoad: async ({ location }): Promise<Ctx> => {
     const { data: u, error } = await supabase.auth.getUser();
-    if (error || !u.user) throw redirect({ to: "/entrar" });
+    if (error || !u.user) throw redirect({ to: "/entrar", search: { modo: "login" } });
 
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
     const isSuperAdmin = (roles ?? []).some((r: any) => r.role === "super_admin");
@@ -88,7 +88,7 @@ function AppLayout() {
           <p className="text-sm text-muted-foreground">
             Sua conta foi suspensa por inadimplência. Regularize o pagamento para voltar a usar o {ctx.company.nome}.
           </p>
-          <Button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }} variant="outline">
+          <Button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar?modo=login"; }} variant="outline">
             Sair
           </Button>
         </div>

@@ -42,7 +42,7 @@ function Page() {
           <Button type="submit" disabled={loading} className="w-full">{loading ? "Enviando…" : "Enviar link"}</Button>
         </form>
         <div className="mt-4 text-center text-sm">
-          <Link to="/entrar" className="text-muted-foreground hover:underline">Voltar para o login</Link>
+          <Link to="/entrar" search={{ modo: "login" }} className="text-muted-foreground hover:underline">Voltar para o login</Link>
         </div>
       </Card>
     </div>

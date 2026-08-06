@@ -81,7 +81,7 @@ export function AppShell({
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Sessão encerrada");
-    navigate({ to: "/entrar", replace: true });
+    navigate({ to: "/entrar", search: { modo: "login" }, replace: true });
   }
 
   const pingFn = useServerFn(pingPresenca);
