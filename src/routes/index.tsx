@@ -868,7 +868,7 @@ function Footer() {
         </div>
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row gap-3 items-center justify-between text-xs text-white/40">
           <span>© {new Date().getFullYear()} {brand.name}. Todos os direitos reservados.</span>
-          <span>Feito no Brasil com ☕ e WhatsApp.</span>
+          <span>Feito no Brasil pela ToledoTech Digital</span>
         </div>
       </div>
     </footer>
