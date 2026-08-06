@@ -394,9 +394,9 @@ function SectionWhatsapp() {
       <Steps
         items={[
           { title: "Acesse Configurações → WhatsApp", desc: "No menu lateral, clique em Configurações e depois na aba WhatsApp." },
-          { title: "Clique em "Conectar WhatsApp"", desc: "Um QR Code será gerado. Ele expira em ~60 segundos." },
+          { title: 'Clique em "Conectar WhatsApp"', desc: "Um QR Code será gerado. Ele expira em ~60 segundos." },
           { title: "Escaneie com o celular", desc: "Abra o WhatsApp no celular → Menu (⋮) → Aparelhos conectados → Conectar um aparelho. Aponte a câmera para o QR." },
-          { title: "Status muda para "Conectado"", desc: "O número de telefone aparecerá na tela de configuração. Pronto!" },
+          { title: 'Status muda para "Conectado"', desc: "O número de telefone aparecerá na tela de configuração. Pronto!" },
         ]}
       />
       <Callout type="danger" icon="🚫">
@@ -429,7 +429,7 @@ function SectionAgenteIa() {
       <Table
         headers={["Campo", "O que colocar"]}
         rows={[
-          ["Nome do agente", "Ex: "Beatriz", "Assistente da Clínica X". Aparece para o cliente."],
+          ["Nome do agente", 'Ex: "Beatriz", "Assistente da Clínica X". Aparece para o cliente.'],
           ["Prompt do sistema", "Descrição do negócio, produtos, preços, horários, tom de voz, o que a IA pode ou não falar."],
           ["Provedor de IA", "Gemini (incluso), OpenAI (chave própria) ou Anthropic (chave própria)"],
           ["Modelo", "Gemini 2.0 Flash (padrão) é rápido e eficiente para a maioria dos casos."],
