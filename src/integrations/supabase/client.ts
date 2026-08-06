@@ -5,8 +5,8 @@ import type { Database } from './types';
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
   // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://ucukwtdfndertwoivdig.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjdWt3dGRmbmRlcnR3b2l2ZGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MDk3ODQsImV4cCI6MjA5ODA4NTc4NH0.BEOBu5N7OjwGsmDAZW-fnZg9s0DMUh997-hmkyZw3Mo";
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://sggehdbiiwbommaczske.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnZ2VoZGJpaXdib21tYWN6c2tlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMzIzMjgsImV4cCI6MjEwMTYwODMyOH0.koKlDxumwxCx40taOiynqVborOYTZn5o_NYgxtkuxYI";
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
