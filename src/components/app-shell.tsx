@@ -22,6 +22,7 @@ type NavItem = {
   icon: any;
   adminOnly?: boolean;
   supervisorOk?: boolean;
+  superAdminOnly?: boolean;
   tag?: string;
   badge?: boolean;
 };
@@ -41,8 +42,8 @@ const sections: { label: string; items: NavItem[] }[] = [
     items: [
       { to: "/app/campanhas", label: "Campanhas", icon: Megaphone, adminOnly: true },
       { to: "/app/agendadas", label: "Agendadas", icon: Clock },
-      { to: "/app/followup", label: "Cadências", icon: Repeat2, adminOnly: true, tag: "NOVO" },
-      { to: "/app/flows", label: "Flow Builder", icon: Workflow, adminOnly: true, tag: "NOVO" },
+      { to: "/app/followup", label: "Cadências", icon: Repeat2, adminOnly: true, superAdminOnly: true, tag: "NOVO" },
+      { to: "/app/flows", label: "Flow Builder", icon: Workflow, adminOnly: true, superAdminOnly: true, tag: "NOVO" },
     ],
   },
   {
@@ -202,7 +203,10 @@ function Sidebar({
               {sec.label}
             </div>
             <div className="flex flex-col gap-1">
-              {sec.items.filter((i) => !i.adminOnly || isAdmin || (isSupervisor && i.supervisorOk)).map((item) => (
+              {sec.items
+                .filter((i) => !i.superAdminOnly || isSuperAdmin)
+                .filter((i) => !i.adminOnly || isAdmin || (isSupervisor && i.supervisorOk))
+                .map((item) => (
                 <NavLink key={item.to} item={item} active={loc.pathname.startsWith(item.to)} primary={primary} />
               ))}
             </div>

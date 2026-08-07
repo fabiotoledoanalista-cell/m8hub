@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listFlows, upsertFlow, deleteFlow, toggleFlow, getFlow } from "@/lib/flows.functions";
@@ -11,6 +11,9 @@ import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/app/flows")({
   head: () => ({ meta: [{ title: `${brand.name} — Flow Builder` }] }),
+  beforeLoad: ({ context }: any) => {
+    if (!context?.isSuperAdmin) throw redirect({ to: "/app/dashboard" });
+  },
   component: FlowsPage,
 });
 

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listSequences, upsertSequence, deleteSequence } from "@/lib/followup.functions";
@@ -12,6 +12,9 @@ import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/app/followup")({
   head: () => ({ meta: [{ title: `${brand.name} — Cadências de Follow-up` }] }),
+  beforeLoad: ({ context }: any) => {
+    if (!context?.isSuperAdmin) throw redirect({ to: "/app/dashboard" });
+  },
   component: FollowupPage,
 });
 
