@@ -5,7 +5,9 @@
 export type PlanSlug = "starter" | "pro" | "business";
 
 export type PlanFeatures = {
-  providersIA: Array<"gemini" | "openai" | "anthropic">;
+  // Fase de validação: só Claude (Anthropic) está habilitado, em todos os
+  // planos. Quando outros provedores voltarem, volte a diferenciar por plano.
+  providersIA: Array<"anthropic">;
   googleCalendar: boolean;
   automacoes: boolean;
   apiWebhooks: boolean;
@@ -15,7 +17,7 @@ export type PlanFeatures = {
 
 export const PLAN_FEATURES: Record<PlanSlug, PlanFeatures> = {
   starter: {
-    providersIA: ["gemini"],
+    providersIA: ["anthropic"],
     googleCalendar: false,
     automacoes: false,
     apiWebhooks: false,
@@ -23,7 +25,7 @@ export const PLAN_FEATURES: Record<PlanSlug, PlanFeatures> = {
     suportePrioritario: false,
   },
   pro: {
-    providersIA: ["gemini", "openai", "anthropic"],
+    providersIA: ["anthropic"],
     googleCalendar: true,
     automacoes: true,
     apiWebhooks: false,
@@ -31,7 +33,7 @@ export const PLAN_FEATURES: Record<PlanSlug, PlanFeatures> = {
     suportePrioritario: true,
   },
   business: {
-    providersIA: ["gemini", "openai", "anthropic"],
+    providersIA: ["anthropic"],
     googleCalendar: true,
     automacoes: true,
     apiWebhooks: true,

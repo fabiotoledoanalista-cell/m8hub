@@ -1,5 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolveCompanyId } from "@/lib/tenant";
+
+async function resolveAnthropicKey(supabase: any, userId: string): Promise<string> {
+  try {
+    const companyId = await resolveCompanyId(supabase, userId);
+    const { data } = await supabase
+      .from("agent_config")
+      .select("anthropic_api_key")
+      .eq("company_id", companyId)
+      .maybeSingle();
+    return data?.anthropic_api_key || "";
+  } catch {
+    return "";
+  }
+}
 
 export type GeneratedAgentConfig = {
   nome_agente: string;
@@ -71,8 +86,9 @@ export const analyzeBusinessBrief = createServerFn({ method: "POST" })
       respostas: d?.respostas && typeof d.respostas === "object" ? d.respostas : {},
     };
   })
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { lovableAiChat } = await import("./lovable-ai.server");
+    const anthropicKey = await resolveAnthropicKey(context.supabase, context.userId);
 
     const respostasTxt = Object.entries(data.respostas)
       .filter(([, v]) => v && String(v).trim())
@@ -130,7 +146,7 @@ Analise e devolva o JSON.`;
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-      { provider: "gemini", model: "gemini-2.0-flash" },
+      { provider: "anthropic", model: "claude-sonnet-4-5", anthropicKey },
     );
 
     const parsed = extractJson(raw);
@@ -170,9 +186,10 @@ export const generateAgentConfig = createServerFn({ method: "POST" })
       respostas: d?.respostas && typeof d.respostas === "object" ? d.respostas : {},
     };
   })
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const { lovableAiChat } = await import("./lovable-ai.server");
     const { buildSystemPrompt } = await import("./ai-prompt");
+    const anthropicKey = await resolveAnthropicKey(context.supabase, context.userId);
 
     const respostasTxt = Object.entries(data.respostas)
       .filter(([, v]) => v && String(v).trim())
@@ -220,7 +237,7 @@ Gere o JSON do agente.`;
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-      { provider: "gemini", model: "gemini-2.0-flash" },
+      { provider: "anthropic", model: "claude-sonnet-4-5", anthropicKey },
     );
 
     const parsed = extractJson(raw) as Partial<GeneratedAgentConfig>;

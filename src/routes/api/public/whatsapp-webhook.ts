@@ -301,10 +301,8 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
             messages.push({ role: "user", content: text });
           }
 
-          // Enforcement de plano: bloqueia IA quando estourar mensagens do mês,
-          // ou força Gemini quando o provider escolhido não está no plano.
-          const { isWithinLimit, getCompanyPlan } = await import("@/lib/plan-limits.server");
-          const { allowsProvider } = await import("@/lib/plan-features");
+          // Enforcement de plano: bloqueia IA quando estourar mensagens do mês.
+          const { isWithinLimit } = await import("@/lib/plan-limits.server");
           const withinMsgs = await isWithinLimit(companyId, "mensagens");
           if (!withinMsgs) {
             await upsertCard(supabaseAdmin, companyId, userId, number, pushName, text, stages);
@@ -317,22 +315,12 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
             console.warn("[whatsapp.safety] resposta pausada", throttleReason, companyId, number);
             return new Response(throttleReason, { status: 200 });
           }
-          const plan = await getCompanyPlan(companyId);
-          let providerChoice = ((cfg as any)?.ai_provider || "gemini") as string;
-          let modelChoice = ((cfg as any)?.ai_model || "gemini-2.0-flash") as string;
-          if (!allowsProvider(plan.slug, providerChoice)) {
-            providerChoice = "gemini";
-            modelChoice = "gemini-2.0-flash";
-          }
+          const { resolveAiProviderConfig } = await import("@/lib/ai-provider.server");
+          const providerConfig = await resolveAiProviderConfig(companyId, cfg as any);
 
           let rawReply = "";
           try {
-            rawReply = await lovableAiChat(messages, {
-              provider: providerChoice,
-              model: modelChoice,
-              openaiKey: (cfg as any)?.openai_api_key || "",
-              anthropicKey: (cfg as any)?.anthropic_api_key || "",
-            });
+            rawReply = await lovableAiChat(messages, providerConfig);
           } catch (e: any) {
             console.error("[ai]", e?.message);
           }

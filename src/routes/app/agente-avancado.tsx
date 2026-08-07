@@ -30,7 +30,7 @@ export const Route = createFileRoute("/app/agente-avancado")({
 });
 
 const DEFAULTS: any = {
-  ai_provider: "gemini", ai_model: "gemini-2.0-flash",
+  ai_provider: "anthropic", ai_model: "claude-sonnet-4-5",
   openai_api_key: "", anthropic_api_key: "",
   nome_agente: "Atendente Virtual", nome_empresa: "",
   papel_objetivo: "Atender clientes, descobrir o que precisam, recomendar com sentido e ajudar a fechar a venda.",
@@ -47,17 +47,9 @@ const DEFAULTS: any = {
   horarios_disponiveis: "", antecedencia_min: "2 horas",
 };
 
+// Por enquanto so Claude esta disponivel. Quando outros provedores forem
+// reativados, basta acrescentar as chaves gemini/openai de volta aqui.
 const PROVIDER_MODELS: Record<string, { value: string; label: string }[]> = {
-  gemini: [
-    { value: "gemini-2.5-flash-preview-05-20", label: "Gemini 2.5 Flash (rápido — incluso)" },
-    { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash (estável — incluso)" },
-    { value: "gemini-2.5-pro-preview-06-05", label: "Gemini 2.5 Pro (mais inteligente — incluso)" },
-  ],
-  openai: [
-    { value: "gpt-4o-mini", label: "GPT-4o mini (rápido e barato)" },
-    { value: "gpt-4o", label: "GPT-4o (premium)" },
-    { value: "gpt-4.1-mini", label: "GPT-4.1 mini" },
-  ],
   anthropic: [
     { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 (rápido)" },
     { value: "claude-sonnet-4-5", label: "Claude Sonnet 4.5 (premium)" },
@@ -75,8 +67,6 @@ function AgentePage() {
   const gStart = useServerFn(startGoogleOAuth);
   const gDisc = useServerFn(disconnectGoogle);
   const plan = usePlanFeatures();
-  const allowOpenAI = plan.features.providersIA.includes("openai");
-  const allowAnthropic = plan.features.providersIA.includes("anthropic");
   const allowGoogleCal = plan.features.googleCalendar;
   const [cfg, setCfg] = useState<any>(DEFAULTS);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -190,19 +180,11 @@ function AgentePage() {
                   <Select value={cfg.ai_provider} onValueChange={(v) => { up("ai_provider", v); up("ai_model", PROVIDER_MODELS[v]?.[0]?.value || ""); }}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="gemini">Google Gemini — incluso, sem custo extra</SelectItem>
-                      <SelectItem value="openai" disabled={!allowOpenAI}>
-                        OpenAI (GPT) — sua chave{!allowOpenAI ? " · Pro/Business" : ""}
-                      </SelectItem>
-                      <SelectItem value="anthropic" disabled={!allowAnthropic}>
-                        Anthropic (Claude) — sua chave{!allowAnthropic ? " · Pro/Business" : ""}
-                      </SelectItem>
+                      <SelectItem value="anthropic">Anthropic (Claude) — sua chave</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Gemini é o padrão e já vem incluso no plano. {(!allowOpenAI || !allowAnthropic) && (
-                      <>GPT e Claude exigem o plano Pro — use sua própria chave de API. <Link to="/app/checkout" className="underline">Fazer upgrade</Link>.</>
-                    )}
+                    Por enquanto só Claude está disponível. Outros provedores voltam em breve.
                   </p>
                 </div>
 
@@ -211,27 +193,18 @@ function AgentePage() {
                   <Select value={cfg.ai_model} onValueChange={(v) => up("ai_model", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {(PROVIDER_MODELS[cfg.ai_provider] || PROVIDER_MODELS.gemini).map((m) => (
+                      {(PROVIDER_MODELS[cfg.ai_provider] || PROVIDER_MODELS.anthropic).map((m) => (
                         <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {cfg.ai_provider === "openai" && (
-                  <div className="space-y-1.5">
-                    <Label>Chave OpenAI (sk-...)</Label>
-                    <Input type="password" value={cfg.openai_api_key} onChange={(e) => up("openai_api_key", e.target.value)} placeholder="sk-..." />
-                    <p className="text-xs text-muted-foreground">Pegue em platform.openai.com → API Keys. A chave fica salva apenas para sua empresa.</p>
-                  </div>
-                )}
-                {cfg.ai_provider === "anthropic" && (
-                  <div className="space-y-1.5">
-                    <Label>Chave Anthropic (sk-ant-...)</Label>
-                    <Input type="password" value={cfg.anthropic_api_key} onChange={(e) => up("anthropic_api_key", e.target.value)} placeholder="sk-ant-..." />
-                    <p className="text-xs text-muted-foreground">Pegue em console.anthropic.com → API Keys.</p>
-                  </div>
-                )}
+                <div className="space-y-1.5">
+                  <Label>Chave Anthropic (sk-ant-...)</Label>
+                  <Input type="password" value={cfg.anthropic_api_key} onChange={(e) => up("anthropic_api_key", e.target.value)} placeholder="sk-ant-..." />
+                  <p className="text-xs text-muted-foreground">Pegue em console.anthropic.com → API Keys.</p>
+                </div>
 
                 <div className="space-y-2 pt-2">
                   <Label>Tempo de espera antes de responder</Label>
