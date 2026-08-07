@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import type { CompanyRow, Membership } from "@/lib/tenant";
 
 type Ctx = {
-  user: { id: string; email?: string | null };
+  user: { id: string; email?: string | null; nome?: string | null };
   company: CompanyRow | null;
   membership: Membership | null;
   isSuperAdmin: boolean;
@@ -21,6 +21,9 @@ export const Route = createFileRoute("/app")({
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
     const isSuperAdmin = (roles ?? []).some((r: any) => r.role === "super_admin");
 
+    const { data: prof } = await supabase.from("profiles").select("nome").eq("user_id", u.user.id).maybeSingle();
+    const userInfo = { id: u.user.id, email: u.user.email, nome: prof?.nome ?? null };
+
     // Impersonação (super admin entrando como empresa via /master/empresas)
     let impersonateId: string | null = null;
     if (isSuperAdmin) {
@@ -31,7 +34,7 @@ export const Route = createFileRoute("/app")({
       const { data: comp } = await supabase.from("company").select("*").eq("id", impersonateId).maybeSingle();
       if (comp) {
         return {
-          user: { id: u.user.id, email: u.user.email },
+          user: userInfo,
           company: comp as any as CompanyRow,
           membership: { company_id: comp.id, role: "owner", forcar_troca_senha: false },
           isSuperAdmin,
@@ -52,7 +55,7 @@ export const Route = createFileRoute("/app")({
     if (!cu) {
       if (isSuperAdmin) throw redirect({ to: "/master/painel" });
       if (location.pathname !== "/app/checkout") throw redirect({ to: "/app/checkout" });
-      return { user: { id: u.user.id, email: u.user.email }, company: null, membership: null, isSuperAdmin, impersonating: false };
+      return { user: userInfo, company: null, membership: null, isSuperAdmin, impersonating: false };
     }
 
     if (cu.forcar_troca_senha && location.pathname !== "/trocar-senha") {
@@ -67,7 +70,7 @@ export const Route = createFileRoute("/app")({
     }
 
     return {
-      user: { id: u.user.id, email: u.user.email },
+      user: userInfo,
       company,
       membership: { company_id: cu.company_id, role: cu.role as any, forcar_troca_senha: cu.forcar_troca_senha },
       isSuperAdmin,
@@ -106,7 +109,7 @@ function AppLayout() {
           </Button>
         </div>
       )}
-      <AppShell company={ctx.company} membership={ctx.membership} email={ctx.user.email} isSuperAdmin={ctx.isSuperAdmin}>
+      <AppShell company={ctx.company} membership={ctx.membership} email={ctx.user.email} nome={ctx.user.nome} isSuperAdmin={ctx.isSuperAdmin}>
         <Outlet />
       </AppShell>
     </>

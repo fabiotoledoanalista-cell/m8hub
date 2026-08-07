@@ -67,12 +67,14 @@ export function AppShell({
   company,
   membership,
   email,
+  nome,
   isSuperAdmin,
 }: {
   children: ReactNode;
   company: CompanyRow | null;
   membership?: Membership | null;
   email?: string | null;
+  nome?: string | null;
   isSuperAdmin?: boolean;
 }) {
   const loc = useLocation();
@@ -96,11 +98,11 @@ export function AppShell({
   const isSupervisor = membership?.role === "supervisor";
   const roleLabel =
     membership?.role === "owner" ? "Dono"
-    : membership?.role === "admin" ? "Admin"
+    : membership?.role === "admin" ? "Administrador"
     : membership?.role === "supervisor" ? "Supervisor"
     : membership?.role === "atendente" ? "Atendente"
     : "Membro";
-  const userName = (email || "Você").split("@")[0];
+  const userName = nome || (email || "Você").split("@")[0];
 
   const mobileItems: MobileNavItem[] = [
     { to: "/app/dashboard", label: "Início", icon: LayoutDashboard },
@@ -142,7 +144,6 @@ export function AppShell({
       <div className="flex flex-1 flex-col md:flex-row">
         <Sidebar
           loc={loc}
-          company={company}
           isSuperAdmin={isSuperAdmin}
           isAdmin={isAdmin}
           isSupervisor={isSupervisor}
@@ -181,18 +182,17 @@ export function AppShell({
 }
 
 function Sidebar({
-  loc, company, isSuperAdmin, isAdmin, isSupervisor, primary, userName, roleLabel,
+  loc, isSuperAdmin, isAdmin, isSupervisor, primary, userName, roleLabel,
 }: any) {
   return (
     <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
-      <div className="px-5 py-5 flex items-center gap-3 border-b border-[color:var(--hairline)]">
-        {company?.logo_url && (
-          <img src={company.logo_url} alt={company.nome} className="size-10 rounded-xl object-cover ring-1 ring-[color:var(--hairline)]" />
-        )}
-        <div className="min-w-0">
-          <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{brand.name}</div>
-          <div className="text-[11.5px] text-muted-foreground truncate -mt-0.5">{userName} — {roleLabel}</div>
-        </div>
+      <div className="px-5 py-4 border-b border-[color:var(--hairline)]">
+        <div className="font-display font-extrabold tracking-tight text-[17px] leading-tight">{brand.name}</div>
+        <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">CRM</div>
+      </div>
+      <div className="px-5 py-4 border-b border-[color:var(--hairline)]">
+        <div className="text-[14px] font-semibold text-foreground truncate">{userName}</div>
+        <div className="text-[12px] text-muted-foreground truncate">{roleLabel}</div>
       </div>
 
       <nav className="p-3 flex-1 overflow-y-auto space-y-5">
