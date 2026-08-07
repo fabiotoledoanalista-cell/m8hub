@@ -191,8 +191,8 @@ function Sidebar({
           <img src={company.logo_url} alt={company.nome} className="size-10 rounded-xl object-cover ring-1 ring-[color:var(--hairline)]" />
         )}
         <div className="min-w-0">
-          <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{brand.name}</div>
-          <div className="text-[11.5px] text-muted-foreground truncate -mt-0.5">{company?.nome || "Sua empresa"}</div>
+          <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{userName}</div>
+          <div className="text-[11.5px] text-muted-foreground truncate -mt-0.5">{roleLabel}</div>
         </div>
       </div>
 
