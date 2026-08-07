@@ -148,7 +148,6 @@ export function AppShell({
           isSupervisor={isSupervisor}
           primary={primary}
           userName={userName}
-          email={email}
           roleLabel={roleLabel}
         />
         <main className="flex-1 px-4 pt-4 pb-28 md:p-8 md:pb-8 max-w-7xl w-full mx-auto">
@@ -182,7 +181,7 @@ export function AppShell({
 }
 
 function Sidebar({
-  loc, company, isSuperAdmin, isAdmin, isSupervisor, primary, userName, email, roleLabel,
+  loc, company, isSuperAdmin, isAdmin, isSupervisor, primary, userName, roleLabel,
 }: any) {
   return (
     <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
@@ -191,8 +190,8 @@ function Sidebar({
           <img src={company.logo_url} alt={company.nome} className="size-10 rounded-xl object-cover ring-1 ring-[color:var(--hairline)]" />
         )}
         <div className="min-w-0">
-          <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{userName}</div>
-          <div className="text-[11.5px] text-muted-foreground truncate -mt-0.5">{roleLabel}</div>
+          <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{brand.name}</div>
+          <div className="text-[11.5px] text-muted-foreground truncate -mt-0.5">{userName} — {roleLabel}</div>
         </div>
       </div>
 
@@ -217,23 +216,11 @@ function Sidebar({
             <Shield className="size-4" /> Painel Master
           </Link>
         )}
-        <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-[color:var(--panel-2)] border border-[color:var(--hairline)]">
-          <div
-            className="size-9 rounded-full grid place-items-center text-[13px] font-bold text-[color:var(--brand-text)] ring-1 ring-[color:var(--hairline-strong)] shrink-0"
-            style={{ background: "var(--brand-soft)" }}
-          >
-            {(userName || "U").slice(0, 1).toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[13.5px] font-semibold truncate">{userName}</div>
-            <div className="text-[11px] text-muted-foreground truncate" title={email || ""}>{roleLabel}</div>
-          </div>
-        </div>
         <a
           href={supportWhatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 flex items-center gap-1.5 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+          className="flex items-center gap-1.5 px-2 text-[11px] text-muted-foreground hover:text-foreground"
         >
           <MessageCircle className="size-3" />
           <span>Suporte: {supportWhatsappDisplay}</span>
