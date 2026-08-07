@@ -34,8 +34,8 @@ function Painel() {
           <h1 className="font-display text-xl sm:text-2xl font-bold">Painel Master</h1>
           <p className="text-xs text-muted-foreground">Visão geral de toda a plataforma.</p>
         </div>
-        <div className="flex items-center gap-2 bg-[rgba(255,90,90,.10)] border border-[rgba(52,211,153,.30)] text-[#6ee7b7] text-[12.5px] font-semibold px-3 py-1.5 rounded-full">
-          <span className="size-2 rounded-full bg-[#34D399]" /> Modo Master
+        <div className="flex items-center gap-2 bg-[color:var(--orange-soft)] border border-[color:var(--orange-soft-strong)] text-[color:var(--orange-text)] text-[12.5px] font-semibold px-3 py-1.5 rounded-full">
+          <span className="size-2 rounded-full bg-[#FF7922]" /> Modo Master
         </div>
       </header>
 
@@ -57,11 +57,11 @@ function Painel() {
         <p className="text-xs text-muted-foreground mb-3">últimos 12 meses</p>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data.series}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.06)" />
-            <XAxis dataKey="mes" fontSize={11} stroke="#8AA89A" />
-            <YAxis fontSize={11} allowDecimals={false} stroke="#8AA89A" />
-            <Tooltip contentStyle={{ background: "#13211A", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, color: "#EAF6EF" }} />
-            <Line type="monotone" dataKey="total" stroke="#34D399" strokeWidth={2.5} dot={{ r: 3, fill: "#34D399" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(38,34,41,.08)" />
+            <XAxis dataKey="mes" fontSize={11} stroke="#8A8690" />
+            <YAxis fontSize={11} allowDecimals={false} stroke="#8A8690" />
+            <Tooltip contentStyle={{ background: "#FFFFFF", border: "1px solid var(--hairline)", borderRadius: 12, color: "var(--foreground)" }} />
+            <Line type="monotone" dataKey="total" stroke="#67308E" strokeWidth={2.5} dot={{ r: 3, fill: "#67308E" }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -74,16 +74,16 @@ function MasterKpi({ icon, label, value, trend, accent }: { icon: React.ReactNod
     <div
       className={`rounded-2xl border p-4 sm:p-5 ${
         accent
-          ? "border-[rgba(52,211,153,.30)] bg-[linear-gradient(160deg,rgba(52,211,153,.10),rgba(52,211,153,.02))]"
+          ? "border-[color:var(--brand-soft-strong)] bg-[linear-gradient(160deg,var(--brand-soft),transparent)]"
           : "border-border bg-card"
       }`}
     >
       <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-        <span className="text-[#34D399]">{icon}</span>
+        <span className="text-[#67308E]">{icon}</span>
         <span className="truncate">{label}</span>
       </div>
       <div className="font-display font-extrabold text-2xl sm:text-3xl mt-2">{value}</div>
-      {trend && <div className="text-xs mt-2 text-[#6ee7b7] flex items-center gap-1.5"><TrendingUp className="size-3.5" />{trend}</div>}
+      {trend && <div className="text-xs mt-2 text-[color:var(--brand-strong)] flex items-center gap-1.5"><TrendingUp className="size-3.5" />{trend}</div>}
     </div>
   );
 }
