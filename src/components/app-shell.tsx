@@ -150,7 +150,6 @@ export function AppShell({
           userName={userName}
           email={email}
           roleLabel={roleLabel}
-          signOut={signOut}
         />
         <main className="flex-1 px-4 pt-4 pb-28 md:p-8 md:pb-8 max-w-7xl w-full mx-auto">
           <div className="hidden md:flex items-center justify-between gap-3 mb-6">
@@ -164,6 +163,13 @@ export function AppShell({
               >
                 {(userName || "U").slice(0, 1).toUpperCase()}
               </div>
+              <button
+                onClick={signOut}
+                title="Sair"
+                className="size-9 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[color:var(--panel-2)]"
+              >
+                <LogOut className="size-4" />
+              </button>
             </div>
           </div>
           {children}
@@ -176,7 +182,7 @@ export function AppShell({
 }
 
 function Sidebar({
-  loc, company, isSuperAdmin, isAdmin, isSupervisor, primary, userName, email, roleLabel, signOut,
+  loc, company, isSuperAdmin, isAdmin, isSupervisor, primary, userName, email, roleLabel,
 }: any) {
   return (
     <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
@@ -222,9 +228,6 @@ function Sidebar({
             <div className="text-[13.5px] font-semibold truncate">{userName}</div>
             <div className="text-[11px] text-muted-foreground truncate" title={email || ""}>{roleLabel}</div>
           </div>
-          <button onClick={signOut} title="Sair" className="size-8 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-[color:var(--panel)]">
-            <LogOut className="size-4" />
-          </button>
         </div>
         <a
           href={supportWhatsappUrl}
