@@ -31,7 +31,7 @@ export const createCheckoutCompany = createServerFn({ method: "POST" })
       .insert({
         nome: data.nome,
         slug,
-        primary_color: "#25D366",
+        primary_color: "#67308E",
         created_by: context.userId,
         status_cobranca: "checkout_pending",
         onboarding_completed: false,

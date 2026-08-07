@@ -31,7 +31,7 @@ export const listQueues = createServerFn({ method: "GET" })
 const queueSchema = z.object({
   nome: z.string().min(1),
   descricao: z.string().optional(),
-  cor: z.string().default("#34D399"),
+  cor: z.string().default("#67308E"),
   ativo: z.boolean().default(true),
   auto_distribuir: z.boolean().default(false),
 });

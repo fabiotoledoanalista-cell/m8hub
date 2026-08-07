@@ -29,14 +29,14 @@ export function InitialsAvatar({
       : {
           width: size,
           height: size,
-          background: "rgba(37,211,102,.15)",
-          color: "#9af0bd",
+          background: "var(--orange-soft)",
+          color: "var(--orange-text)",
           fontSize,
         };
   return (
     <div
       className={cn(
-        "shrink-0 rounded-full grid place-items-center font-display font-semibold ring-1 ring-[rgba(37,211,102,.25)]",
+        "shrink-0 rounded-full grid place-items-center font-display font-semibold ring-1 ring-[color:var(--orange-soft-strong)]",
         className,
       )}
       style={style}

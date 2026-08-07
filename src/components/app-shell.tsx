@@ -265,9 +265,9 @@ function NavLink({ item, active, primary }: { item: NavItem; active: boolean; pr
         <span
           className="text-[10px] font-bold px-1.5 py-0.5 rounded ring-1"
           style={{
-            background: "var(--brand-soft)",
-            color: "var(--brand-text)",
-            borderColor: "var(--brand-soft-strong)",
+            background: "var(--orange-soft)",
+            color: "var(--orange-text)",
+            borderColor: "var(--orange-soft-strong)",
           }}
         >
           {item.tag}

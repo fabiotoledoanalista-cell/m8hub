@@ -34,7 +34,7 @@ function ConfigPage() {
   const company = ctx.company;
 
   const [empresa, setEmpresa] = useState({ nome: "", telefone: "" });
-  const [identidade, setIdentidade] = useState({ primary_color: "#22C55E", logo_url: "" });
+  const [identidade, setIdentidade] = useState({ primary_color: "#67308E", logo_url: "" });
   const [perfil, setPerfil] = useState({ nome: "", email: ctx.user.email ?? "" });
   const [senha, setSenha] = useState({ nova: "", confirma: "" });
   const [savingE, setSavingE] = useState(false);

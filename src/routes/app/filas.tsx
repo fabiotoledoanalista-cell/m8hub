@@ -17,7 +17,7 @@ export const Route = createFileRoute("/app/filas")({
   component: FilasPage,
 });
 
-const CORES = ["#34D399","#60A5FA","#FBBF24","#F87171","#A78BFA","#F472B6","#2DD4BF","#FB923C"];
+const CORES = ["#67308E","#60A5FA","#FBBF24","#F87171","#A78BFA","#F472B6","#2DD4BF","#FB923C"];
 const DIAS = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const FUSOS = [
   "America/Sao_Paulo",
@@ -70,7 +70,7 @@ function FilasPage() {
   }, [companyId]);
 
   async function openModal(q: Partial<Queue> | null) {
-    setModal(q ?? { cor: "#34D399", ativo: true });
+    setModal(q ?? { cor: "#67308E", ativo: true });
     setSelectedMembers(new Set((q?.queue_members ?? []).map((m) => m.user_id)));
     setActiveTab("geral");
     // Carrega horário de funcionamento se for edição de fila existente
@@ -122,7 +122,7 @@ function FilasPage() {
     if (!modal?.nome?.trim()) return toast.error("Nome obrigatório");
     setSaving(true);
     try {
-      const res = await saveQueue({ data: { id: modal.id, nome: modal.nome, descricao: modal.descricao ?? "", cor: modal.cor ?? "#34D399", ativo: modal.ativo ?? true, auto_distribuir: modal.auto_distribuir ?? false } });
+      const res = await saveQueue({ data: { id: modal.id, nome: modal.nome, descricao: modal.descricao ?? "", cor: modal.cor ?? "#67308E", ativo: modal.ativo ?? true, auto_distribuir: modal.auto_distribuir ?? false } });
       const queueId = modal.id ?? (res as any).id;
       await saveMembers({ data: { queue_id: queueId, user_ids: Array.from(selectedMembers) } });
       await saveBH({ data: {

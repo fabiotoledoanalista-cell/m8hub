@@ -132,25 +132,25 @@ function EntrarPage() {
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-background text-foreground">
-      {/* Ambient glows — same vibe as LP */}
+      {/* Ambient glows — roxo/laranja da marca */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full blur-3xl opacity-40"
-          style={{ background: "radial-gradient(circle, #25D366 0%, transparent 60%)" }}
+          className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full blur-3xl opacity-20"
+          style={{ background: "radial-gradient(circle, #67308E 0%, transparent 60%)" }}
         />
         <div
-          className="absolute top-[30%] -right-40 h-[700px] w-[700px] rounded-full blur-3xl opacity-25"
-          style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 65%)" }}
+          className="absolute top-[30%] -right-40 h-[700px] w-[700px] rounded-full blur-3xl opacity-[.12]"
+          style={{ background: "radial-gradient(circle, #FF7922 0%, transparent 65%)" }}
         />
         <div
-          className="absolute bottom-[-200px] left-1/3 h-[500px] w-[500px] rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #16A34A 0%, transparent 60%)" }}
+          className="absolute bottom-[-200px] left-1/3 h-[500px] w-[500px] rounded-full blur-3xl opacity-10"
+          style={{ background: "radial-gradient(circle, #67308E 0%, transparent 60%)" }}
         />
       </div>
 
       <div className="relative z-10 min-h-screen grid lg:grid-cols-[1.05fr_1fr]">
         {/* LEFT — brand pane (hidden on mobile) */}
-        <aside className="hidden lg:flex flex-col justify-between p-10 xl:p-14 border-r border-[color:var(--hairline)] bg-[linear-gradient(160deg,rgba(22,163,74,.10),rgba(34,211,238,.04)_55%,transparent)]">
+        <aside className="hidden lg:flex flex-col justify-between p-10 xl:p-14 border-r border-[color:var(--hairline)] bg-[linear-gradient(160deg,rgba(103,48,142,.08),rgba(255,121,34,.05)_55%,transparent)]">
           <div className="flex items-center gap-3">
             <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="size-4" />
@@ -206,8 +206,8 @@ function EntrarPage() {
               {/* corner accent */}
               <div
                 aria-hidden
-                className="absolute -top-24 -right-24 size-56 rounded-full blur-3xl opacity-50"
-                style={{ background: "radial-gradient(circle, rgba(22,163,74,.35) 0%, transparent 70%)" }}
+                className="absolute -top-24 -right-24 size-56 rounded-full blur-3xl opacity-40"
+                style={{ background: "radial-gradient(circle, rgba(255,121,34,.35) 0%, transparent 70%)" }}
               />
 
               <div className="relative">
@@ -279,7 +279,7 @@ function EntrarPage() {
                     type="submit"
                     disabled={loading}
                     size="lg"
-                    className="w-full h-12 bg-gradient-brand text-primary-foreground hover:opacity-95 font-semibold text-[14.5px] shadow-[0_8px_24px_-10px_rgba(22,163,74,.6)]"
+                    className="w-full h-12 bg-gradient-brand text-primary-foreground hover:opacity-95 font-semibold text-[14.5px] shadow-[0_8px_24px_-10px_rgba(103,48,142,.55)]"
                   >
                     {loading && <Loader2 className="size-4 mr-2 animate-spin" />}
                     {needsPassword ? "Entrar e continuar" : planInfo ? "Continuar para o pagamento" : "Criar conta grátis"}
