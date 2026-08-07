@@ -133,12 +133,12 @@
   --sidebar-border: var(--hairline);
   --sidebar-ring: var(--brand);
 
-  --brand-soft: rgba(103,48,142,.10);
-  --brand-soft-strong: rgba(103,48,142,.22);
+  --brand-soft: rgba(103,48,142,.16);
+  --brand-soft-strong: rgba(103,48,142,.34);
   --brand-text: var(--neonGreen);
 
-  --orange-soft: rgba(255,121,34,.14);
-  --orange-soft-strong: rgba(255,121,34,.32);
+  --orange-soft: rgba(255,121,34,.20);
+  --orange-soft-strong: rgba(255,121,34,.42);
   --orange-text: #C2570F;
 
   --shadow-card: 0 1px 2px rgba(38,34,41,.04), 0 1px 3px rgba(38,34,41,.06);

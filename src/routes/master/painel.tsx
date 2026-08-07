@@ -71,29 +71,29 @@ function Painel() {
 
 type KpiTone = "purple" | "orange" | "lilac" | "peach";
 
-const KPI_TONES: Record<KpiTone, { border: string; bg: string; icon: string; trend: string }> = {
+const KPI_TONES: Record<KpiTone, { border: string; bg: string; iconBg: string; trend: string }> = {
   purple: {
-    border: "border-[rgba(103,48,142,.28)]",
-    bg: "bg-[linear-gradient(160deg,rgba(103,48,142,.12),rgba(103,48,142,.02))]",
-    icon: "text-[#67308E]",
+    border: "border-[rgba(103,48,142,.38)]",
+    bg: "bg-[linear-gradient(160deg,rgba(103,48,142,.18),rgba(103,48,142,.03))]",
+    iconBg: "bg-[#67308E]",
     trend: "text-[#67308E]",
   },
   orange: {
-    border: "border-[rgba(255,121,34,.32)]",
-    bg: "bg-[linear-gradient(160deg,rgba(255,121,34,.14),rgba(255,121,34,.02))]",
-    icon: "text-[#C2570F]",
+    border: "border-[rgba(255,121,34,.42)]",
+    bg: "bg-[linear-gradient(160deg,rgba(255,121,34,.20),rgba(255,121,34,.04))]",
+    iconBg: "bg-[#FF7922]",
     trend: "text-[#C2570F]",
   },
   lilac: {
-    border: "border-[rgba(155,109,196,.30)]",
-    bg: "bg-[linear-gradient(160deg,rgba(155,109,196,.14),rgba(155,109,196,.02))]",
-    icon: "text-[#8C56B5]",
+    border: "border-[rgba(155,109,196,.42)]",
+    bg: "bg-[linear-gradient(160deg,rgba(155,109,196,.20),rgba(155,109,196,.03))]",
+    iconBg: "bg-[#9B6DC4]",
     trend: "text-[#8C56B5]",
   },
   peach: {
-    border: "border-[rgba(255,159,90,.32)]",
-    bg: "bg-[linear-gradient(160deg,rgba(255,159,90,.16),rgba(255,159,90,.03))]",
-    icon: "text-[#D9740A]",
+    border: "border-[rgba(255,159,90,.44)]",
+    bg: "bg-[linear-gradient(160deg,rgba(255,159,90,.22),rgba(255,159,90,.04))]",
+    iconBg: "bg-[#FF9F5A]",
     trend: "text-[#D9740A]",
   },
 };
@@ -103,11 +103,11 @@ function MasterKpi({ icon, label, value, trend, tone = "purple" }: { icon: React
   return (
     <div className={`rounded-2xl border p-4 sm:p-5 ${t.border} ${t.bg}`}>
       <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-        <span className={t.icon}>{icon}</span>
+        <span className={`grid place-items-center rounded-lg size-6 shrink-0 text-white ${t.iconBg}`}>{icon}</span>
         <span className="truncate">{label}</span>
       </div>
       <div className="font-display font-extrabold text-2xl sm:text-3xl mt-2">{value}</div>
-      {trend && <div className={`text-xs mt-2 flex items-center gap-1.5 ${t.trend}`}><TrendingUp className="size-3.5" />{trend}</div>}
+      {trend && <div className={`text-xs mt-2 flex items-center gap-1.5 font-semibold ${t.trend}`}><TrendingUp className="size-3.5" />{trend}</div>}
     </div>
   );
 }
