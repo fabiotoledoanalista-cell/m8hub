@@ -21,8 +21,12 @@ export const Route = createFileRoute("/app")({
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
     const isSuperAdmin = (roles ?? []).some((r: any) => r.role === "super_admin");
 
-    const { data: prof } = await supabase.from("profiles").select("nome").eq("user_id", u.user.id).maybeSingle();
-    const userInfo = { id: u.user.id, email: u.user.email, nome: prof?.nome ?? null };
+    let nome: string | null = null;
+    try {
+      const { data: prof } = await supabase.from("profiles").select("nome").eq("user_id", u.user.id).maybeSingle();
+      nome = prof?.nome ?? null;
+    } catch {}
+    const userInfo = { id: u.user.id, email: u.user.email, nome };
 
     // Impersonação (super admin entrando como empresa via /master/empresas)
     let impersonateId: string | null = null;
