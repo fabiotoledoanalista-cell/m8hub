@@ -80,9 +80,13 @@ export const connectWhatsapp = createServerFn({ method: "POST" })
     try {
       await evoCreateInstance(instanceName, webhookUrl);
     } catch (e: any) {
-      const msg = String(e?.message || "");
-      if (!/exists|already/i.test(msg)) console.warn("[evolution.create]", msg);
-      if (!/exists|already/i.test(msg)) throw e;
+      // A instância pode já existir no servidor Evolution (ex: reconexão após
+      // "Desconectar", que só faz logout, não apaga a instância). O servidor
+      // pode responder com mensagens variadas para isso (already exists,
+      // Forbidden, etc.) — em vez de tentar adivinhar o texto exato, apenas
+      // seguimos para o QR Code: se a instância realmente não existir, a
+      // chamada de evoGetQr abaixo vai falhar e o erro real aparece lá.
+      console.warn("[evolution.create]", e?.message || e);
     }
 
     if (webhookUrl) {
