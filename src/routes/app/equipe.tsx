@@ -9,10 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Copy, Trash2 } from "lucide-react";
+import { Loader2, UserPlus, Copy, Trash2, Pencil } from "lucide-react";
 import { brand } from "@/config/brand";
-import { listTeam, inviteMember, setMemberActive, setMemberRole, removeMember } from "@/lib/team.functions";
+import { listTeam, inviteMember, setMemberActive, setMemberRole, removeMember, updateMember } from "@/lib/team.functions";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { PlanUsageBadge } from "@/components/plan-usage-badge";
 
@@ -37,6 +40,7 @@ function EquipePage() {
   const toggleActive = useServerFn(setMemberActive);
   const changeRole = useServerFn(setMemberRole);
   const remove = useServerFn(removeMember);
+  const update = useServerFn(updateMember);
   const plan = usePlanFeatures();
 
   const [members, setMembers] = useState<any[]>([]);
@@ -45,6 +49,41 @@ function EquipePage() {
   const [role, setRole] = useState<"admin" | "supervisor" | "atendente">("atendente");
   const [busy, setBusy] = useState(false);
   const [tempPwd, setTempPwd] = useState<string | null>(null);
+
+  const [editing, setEditing] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({ nome: "", cargo: "", telefone: "", role: "atendente" as "admin" | "supervisor" | "atendente" });
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  function openEdit(m: any) {
+    setEditing(m);
+    setEditForm({
+      nome: m.nome || "",
+      cargo: m.cargo || "",
+      telefone: m.telefone || "",
+      role: (m.role === "owner" ? "admin" : m.role) as any,
+    });
+  }
+
+  async function saveEdit() {
+    if (!editing) return;
+    setSavingEdit(true);
+    try {
+      await update({
+        data: {
+          memberId: editing.id,
+          nome: editForm.nome.trim() || null,
+          cargo: editForm.cargo.trim() || null,
+          telefone: editForm.telefone.trim() || null,
+          role: editing.role === "owner" ? undefined : editForm.role,
+          companyId,
+        },
+      });
+      toast.success("Membro atualizado");
+      setEditing(null);
+      await reload();
+    } catch (e: any) { toast.error(e?.message); }
+    finally { setSavingEdit(false); }
+  }
 
   async function reload() {
     setLoading(true);
@@ -169,6 +208,11 @@ function EquipePage() {
                   </Badge>
                 </div>
                 <div className="col-span-2 text-right flex items-center justify-end gap-1.5">
+                  {canManage && (
+                    <Button size="sm" variant="outline" onClick={() => openEdit(m)}>
+                      <Pencil className="size-3.5" />
+                    </Button>
+                  )}
                   {canManage && m.role !== "owner" && (
                     <>
                       <Button size="sm" variant="outline" onClick={() =>
@@ -187,6 +231,54 @@ function EquipePage() {
           </ul>
         )}
       </Card>
+
+      <Dialog open={!!editing} onOpenChange={(o) => { if (!o && !savingEdit) setEditing(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar membro</DialogTitle></DialogHeader>
+          {editing && (
+            <div className="space-y-4">
+              <div>
+                <Label>Email</Label>
+                <Input value={editing.email || ""} disabled />
+              </div>
+              <div>
+                <Label>Nome</Label>
+                <Input value={editForm.nome} onChange={(e) => setEditForm((f) => ({ ...f, nome: e.target.value }))} placeholder="Nome completo" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Cargo</Label>
+                  <Input value={editForm.cargo} onChange={(e) => setEditForm((f) => ({ ...f, cargo: e.target.value }))} placeholder="Ex: Vendedor" />
+                </div>
+                <div>
+                  <Label>Telefone</Label>
+                  <Input value={editForm.telefone} onChange={(e) => setEditForm((f) => ({ ...f, telefone: e.target.value }))} placeholder="(00) 00000-0000" />
+                </div>
+              </div>
+              {editing.role !== "owner" && (
+                <div>
+                  <Label>Papel</Label>
+                  <Select value={editForm.role} onValueChange={(v) => setEditForm((f) => ({ ...f, role: v as any }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="atendente">Atendente</SelectItem>
+                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)} disabled={savingEdit}>Cancelar</Button>
+            <Button onClick={saveEdit} disabled={savingEdit}>
+              {savingEdit && <Loader2 className="size-4 mr-1.5 animate-spin" />}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

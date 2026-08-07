@@ -45,19 +45,23 @@ export const listTeam = createServerFn({ method: "POST" })
       .order("created_at", { ascending: true });
     if (error) throw error;
     const ids = (members ?? []).map((m: any) => m.user_id);
-    let profilesById = new Map<string, { email: string | null; nome: string | null }>();
+    let profilesById = new Map<string, { email: string | null; nome: string | null; cargo: string | null; telefone: string | null }>();
     if (ids.length) {
       const { data: profs } = await supabaseAdmin
         .from("profiles")
-        .select("user_id, email, nome")
+        .select("user_id, email, nome, cargo, telefone")
         .in("user_id", ids);
-      (profs ?? []).forEach((p: any) => profilesById.set(p.user_id, { email: p.email, nome: p.nome }));
+      (profs ?? []).forEach((p: any) =>
+        profilesById.set(p.user_id, { email: p.email, nome: p.nome, cargo: p.cargo, telefone: p.telefone }),
+      );
     }
     return {
       members: (members ?? []).map((m: any) => ({
         ...m,
         email: profilesById.get(m.user_id)?.email ?? null,
         nome: profilesById.get(m.user_id)?.nome ?? null,
+        cargo: profilesById.get(m.user_id)?.cargo ?? null,
+        telefone: profilesById.get(m.user_id)?.telefone ?? null,
       })),
     };
   });
@@ -160,6 +164,68 @@ export const setMemberRole = createServerFn({ method: "POST" })
       .eq("id", data.memberId)
       .eq("company_id", companyId);
     if (error) throw error;
+    return { ok: true };
+  });
+
+export const updateMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    memberId: string;
+    nome?: string | null;
+    cargo?: string | null;
+    telefone?: string | null;
+    role?: "owner" | "admin" | "supervisor" | "atendente";
+    ativo?: boolean;
+    companyId?: string | null;
+  }) => d)
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { companyId, role, isSuper } = await resolveTeamContext(supabase, userId, data.companyId);
+    assertAdmin(role, isSuper);
+
+    const { data: target, error: tErr } = await supabase
+      .from("company_user")
+      .select("user_id, role")
+      .eq("id", data.memberId)
+      .eq("company_id", companyId)
+      .maybeSingle();
+    if (tErr) throw tErr;
+    if (!target) throw new Error("Membro não encontrado.");
+
+    if (data.role && data.role !== target.role) {
+      if (!isSuper && role !== "owner") throw new Error("Apenas o owner pode alterar papéis.");
+      if (target.role === "owner") throw new Error("Não é possível alterar o papel do dono da empresa.");
+      const { error } = await supabase
+        .from("company_user")
+        .update({ role: data.role })
+        .eq("id", data.memberId)
+        .eq("company_id", companyId);
+      if (error) throw error;
+    }
+
+    if (typeof data.ativo === "boolean" && target.role !== "owner") {
+      if (data.ativo) {
+        const { assertWithinLimit } = await import("./plan-limits.server");
+        await assertWithinLimit(companyId, "usuarios");
+      }
+      const { error } = await supabase
+        .from("company_user")
+        .update({ ativo: data.ativo })
+        .eq("id", data.memberId)
+        .eq("company_id", companyId);
+      if (error) throw error;
+    }
+
+    if (data.nome !== undefined || data.cargo !== undefined || data.telefone !== undefined) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const patch: { nome?: string | null; cargo?: string | null; telefone?: string | null } = {};
+      if (data.nome !== undefined) patch.nome = data.nome || null;
+      if (data.cargo !== undefined) patch.cargo = data.cargo || null;
+      if (data.telefone !== undefined) patch.telefone = data.telefone || null;
+      const { error } = await supabaseAdmin.from("profiles").update(patch as any).eq("user_id", target.user_id);
+      if (error) throw error;
+    }
+
     return { ok: true };
   });
 
