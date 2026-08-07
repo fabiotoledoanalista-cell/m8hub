@@ -18,6 +18,12 @@ export const gerarResumoIA = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!card) throw new Error("Conversa não encontrada");
 
+    const { data: cfg } = await supabase
+      .from("agent_config")
+      .select("ai_provider, ai_model, openai_api_key, anthropic_api_key")
+      .eq("company_id", companyId)
+      .maybeSingle();
+
     const { data: msgs } = await supabase
       .from("mensagens")
       .select("direcao, autor, texto, created_at")
@@ -36,6 +42,8 @@ export const gerarResumoIA = createServerFn({ method: "POST" })
       .join("\n");
 
     const { lovableAiChat } = await import("./lovable-ai.server");
+    const { resolveAiProviderConfig } = await import("./ai-provider.server");
+    const providerConfig = await resolveAiProviderConfig(companyId, cfg as any);
 
     const system = `Você é um assistente de CRM. Sua tarefa é gerar um RESUMO OBJETIVO de uma conversa de WhatsApp entre uma empresa e um cliente.
 
@@ -50,7 +58,7 @@ Seja direto, sem jargão. Escreva em português do Brasil. Não inclua saudaçõ
 
     const resumo = await lovableAiChat(
       [{ role: "system", content: system }, { role: "user", content: user }],
-      { provider: "gemini", model: "gemini-2.0-flash" },
+      providerConfig,
     );
 
     await (supabase as any)
