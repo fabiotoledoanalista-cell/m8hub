@@ -1,7 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function getOwnedCompanyId(supabase: any, userId: string): Promise<{ companyId: string; role: string }> {
+async function resolveTeamContext(
+  supabase: any,
+  userId: string,
+  requestedCompanyId?: string | null,
+): Promise<{ companyId: string; role: string; isSuper: boolean }> {
+  const { data: superData } = await supabase.rpc("is_super_admin");
+  const isSuper = !!superData;
+  if (isSuper && requestedCompanyId) {
+    return { companyId: requestedCompanyId, role: "owner", isSuper: true };
+  }
   const { data, error } = await supabase
     .from("company_user")
     .select("company_id, role")
@@ -12,10 +21,11 @@ async function getOwnedCompanyId(supabase: any, userId: string): Promise<{ compa
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("Sem empresa.");
-  return { companyId: data.company_id as string, role: data.role as string };
+  return { companyId: data.company_id as string, role: data.role as string, isSuper };
 }
 
-function assertAdmin(role: string) {
+function assertAdmin(role: string, isSuper: boolean) {
+  if (isSuper) return;
   if (role !== "owner" && role !== "admin") {
     throw new Error("Apenas owner/admin podem gerenciar a equipe.");
   }
@@ -23,9 +33,10 @@ function assertAdmin(role: string) {
 
 export const listTeam = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d?: { companyId?: string | null }) => ({ companyId: d?.companyId ?? null }))
+  .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { companyId } = await getOwnedCompanyId(supabase, userId);
+    const { companyId } = await resolveTeamContext(supabase, userId, data.companyId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: members, error } = await supabaseAdmin
       .from("company_user")
@@ -53,25 +64,21 @@ export const listTeam = createServerFn({ method: "POST" })
 
 export const inviteMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { email: string; role: "admin" | "supervisor" | "atendente" }) => {
+  .inputValidator((d: { email: string; role: "admin" | "supervisor" | "atendente"; companyId?: string | null }) => {
     const email = String(d.email || "").trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Email inválido");
     if (!["admin", "supervisor", "atendente"].includes(d.role)) throw new Error("Role inválida");
-    return { email, role: d.role };
+    return { email, role: d.role, companyId: d.companyId ?? null };
   })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { companyId, role } = await getOwnedCompanyId(supabase, userId);
-    assertAdmin(role);
+    const { companyId, role, isSuper } = await resolveTeamContext(supabase, userId, data.companyId);
+    assertAdmin(role, isSuper);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Busca user existente por email
     let targetUserId: string | null = null;
-    const { data: prof } = await supabaseAdmin
-      .from("profiles")
-      .select("user_id")
-      .eq("email", data.email)
-      .maybeSingle();
+    const { data: prof } = await supabaseAdmin.from("profiles").select("user_id").eq("email", data.email).maybeSingle();
     if (prof) targetUserId = prof.user_id;
 
     // Plan enforcement: só conta se o user ainda não é membro ativo
@@ -122,28 +129,61 @@ export const inviteMember = createServerFn({ method: "POST" })
 
 export const setMemberActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { memberId: string; ativo: boolean }) => d)
+  .inputValidator((d: { memberId: string; ativo: boolean; companyId?: string | null }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { companyId, role } = await getOwnedCompanyId(supabase, userId);
-    assertAdmin(role);
+    const { companyId, role, isSuper } = await resolveTeamContext(supabase, userId, data.companyId);
+    assertAdmin(role, isSuper);
     if (data.ativo) {
       const { assertWithinLimit } = await import("./plan-limits.server");
       await assertWithinLimit(companyId, "usuarios");
     }
-    const { error } = await supabase.from("company_user").update({ ativo: data.ativo }).eq("id", data.memberId);
+    const { error } = await supabase
+      .from("company_user")
+      .update({ ativo: data.ativo })
+      .eq("id", data.memberId)
+      .eq("company_id", companyId);
     if (error) throw error;
     return { ok: true };
   });
 
 export const setMemberRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { memberId: string; role: "owner" | "admin" | "supervisor" | "atendente" }) => d)
+  .inputValidator((d: { memberId: string; role: "owner" | "admin" | "supervisor" | "atendente"; companyId?: string | null }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { role } = await getOwnedCompanyId(supabase, userId);
-    if (role !== "owner") throw new Error("Apenas o owner pode alterar papéis.");
-    const { error } = await supabase.from("company_user").update({ role: data.role }).eq("id", data.memberId);
+    const { companyId, role, isSuper } = await resolveTeamContext(supabase, userId, data.companyId);
+    if (!isSuper && role !== "owner") throw new Error("Apenas o owner pode alterar papéis.");
+    const { error } = await supabase
+      .from("company_user")
+      .update({ role: data.role })
+      .eq("id", data.memberId)
+      .eq("company_id", companyId);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const removeMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { memberId: string; companyId?: string | null }) => d)
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { companyId, role, isSuper } = await resolveTeamContext(supabase, userId, data.companyId);
+    assertAdmin(role, isSuper);
+    const { data: target, error: tErr } = await supabase
+      .from("company_user")
+      .select("role")
+      .eq("id", data.memberId)
+      .eq("company_id", companyId)
+      .maybeSingle();
+    if (tErr) throw tErr;
+    if (!target) throw new Error("Membro não encontrado.");
+    if (target.role === "owner") throw new Error("Não é possível remover o dono da empresa.");
+    const { error } = await supabase
+      .from("company_user")
+      .delete()
+      .eq("id", data.memberId)
+      .eq("company_id", companyId);
     if (error) throw error;
     return { ok: true };
   });

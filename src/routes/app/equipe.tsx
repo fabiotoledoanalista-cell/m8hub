@@ -10,9 +10,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Copy } from "lucide-react";
+import { Loader2, UserPlus, Copy, Trash2 } from "lucide-react";
 import { brand } from "@/config/brand";
-import { listTeam, inviteMember, setMemberActive, setMemberRole } from "@/lib/team.functions";
+import { listTeam, inviteMember, setMemberActive, setMemberRole, removeMember } from "@/lib/team.functions";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { PlanUsageBadge } from "@/components/plan-usage-badge";
 
@@ -28,12 +28,15 @@ export const Route = createFileRoute("/app/equipe")({
 function EquipePage() {
   const ctx = Route.useRouteContext();
   const myRole = ctx.membership?.role;
-  const isOwner = myRole === "owner";
-  const canManage = myRole === "owner" || myRole === "admin";
+  const isSuperAdmin = !!ctx.isSuperAdmin;
+  const isOwner = myRole === "owner" || isSuperAdmin;
+  const canManage = myRole === "owner" || myRole === "admin" || isSuperAdmin;
+  const companyId = ctx.company?.id ?? null;
   const list = useServerFn(listTeam);
   const invite = useServerFn(inviteMember);
   const toggleActive = useServerFn(setMemberActive);
   const changeRole = useServerFn(setMemberRole);
+  const remove = useServerFn(removeMember);
   const plan = usePlanFeatures();
 
   const [members, setMembers] = useState<any[]>([]);
@@ -45,7 +48,7 @@ function EquipePage() {
 
   async function reload() {
     setLoading(true);
-    try { const r = await list(); setMembers(r.members); }
+    try { const r = await list({ data: { companyId } }); setMembers(r.members); }
     catch (e: any) { toast.error(e?.message); }
     finally { setLoading(false); }
   }
@@ -56,7 +59,7 @@ function EquipePage() {
     e.preventDefault();
     setBusy(true); setTempPwd(null);
     try {
-      const r = await invite({ data: { email, role } });
+      const r = await invite({ data: { email, role, companyId } });
       setEmail("");
       toast.success("Membro adicionado");
       if (r.tempPassword) {
@@ -65,6 +68,15 @@ function EquipePage() {
       await Promise.all([reload(), plan.refresh()]);
     } catch (e: any) { toast.error(e?.message); }
     finally { setBusy(false); }
+  }
+
+  async function doRemove(memberId: string) {
+    if (!window.confirm("Remover este membro da equipe? Essa ação não pode ser desfeita.")) return;
+    try {
+      await remove({ data: { memberId, companyId } });
+      toast.success("Membro removido");
+      await Promise.all([reload(), plan.refresh()]);
+    } catch (e: any) { toast.error(e?.message); }
   }
 
   return (
@@ -138,7 +150,7 @@ function EquipePage() {
                 <div className="col-span-3">
                   {isOwner && m.role !== "owner" ? (
                     <Select value={m.role} onValueChange={(v) =>
-                      changeRole({ data: { memberId: m.id, role: v as any } }).then(reload).catch((e) => toast.error(e?.message))
+                      changeRole({ data: { memberId: m.id, role: v as any, companyId } }).then(reload).catch((e) => toast.error(e?.message))
                     }>
                       <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -156,13 +168,18 @@ function EquipePage() {
                     {m.ativo ? "Ativo" : "Inativo"}
                   </Badge>
                 </div>
-                <div className="col-span-2 text-right">
+                <div className="col-span-2 text-right flex items-center justify-end gap-1.5">
                   {canManage && m.role !== "owner" && (
-                    <Button size="sm" variant="outline" onClick={() =>
-                      toggleActive({ data: { memberId: m.id, ativo: !m.ativo } }).then(reload).catch((e) => toast.error(e?.message))
-                    }>
-                      {m.ativo ? "Desativar" : "Ativar"}
-                    </Button>
+                    <>
+                      <Button size="sm" variant="outline" onClick={() =>
+                        toggleActive({ data: { memberId: m.id, ativo: !m.ativo, companyId } }).then(reload).catch((e) => toast.error(e?.message))
+                      }>
+                        {m.ativo ? "Desativar" : "Ativar"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-destructive hover:text-destructive" onClick={() => doRemove(m.id)}>
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </>
                   )}
                 </div>
               </li>
