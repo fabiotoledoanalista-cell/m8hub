@@ -2,8 +2,9 @@
 export const brand = {
   name: "M8HUB",
   tagline: "Atendimento inteligente via WhatsApp",
-  primary: "#34D399",
-  primaryOklch: "0.79 0.15 162",
+  primary: "#67308E",
+  primaryOklch: "0.38 0.16 315",
+  secondary: "#FF7922",
 };
 
 // Suporte fixo — usado em rodapé, telas de erro e mensagens de falha.

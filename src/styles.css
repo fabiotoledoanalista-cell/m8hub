@@ -57,100 +57,103 @@
 }
 
 /* ============================================================
-   THEME — ToledoTech Design System v2.0 · Digital Futurista Dark
+   THEME — M8HUB Design System v3.0 · Claro (Roxo/Laranja/Cinza)
    ============================================================ */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --radius: 0.75rem;
 
-  /* ── Tokens oficiais do Design System ── */
-  --darkBg: #0F1623;
-  --neonGreen: #34D399;
-  --selectBlue: #1E2E48;
-  --selectBlueBorder: #2E4570;
-  --selectBlueText: #7EB3F5;
-  --textPrimary: #CBD5E1;
-  --textMuted: #64748B;
-  --errorRed: #F87171;
-  --errorBg: rgba(248,113,113,0.08);
-  --errorBorder: rgba(248,113,113,0.25);
-  --warnAmber: #FBBF24;
-  --warnBg: rgba(251,191,36,0.08);
-  --warnBorder: rgba(251,191,36,0.25);
-  --infoBlue: #60A5FA;
-  --infoBg: rgba(96,165,250,0.08);
-  --infoBorder: rgba(96,165,250,0.25);
+  /* ── Tokens oficiais da marca ── */
+  --darkBg: #67308E;      /* mantido o nome por compat. — agora é o roxo da marca */
+  --neonGreen: #67308E;   /* mantido o nome por compat. — agora é o roxo da marca */
+  --brandOrange: #FF7922;
+  --brandGray: #606060;
+  --selectBlue: #F4EEF8;
+  --selectBlueBorder: #D9C4E6;
+  --selectBlueText: #67308E;
+  --textPrimary: #262229;
+  --textMuted: #606060;
+  --errorRed: #DC2626;
+  --errorBg: rgba(220,38,38,0.06);
+  --errorBorder: rgba(220,38,38,0.25);
+  --warnAmber: #FF7922;
+  --warnBg: rgba(255,121,34,0.08);
+  --warnBorder: rgba(255,121,34,0.25);
+  --infoBlue: #3B82F6;
+  --infoBg: rgba(59,130,246,0.06);
+  --infoBorder: rgba(59,130,246,0.2);
 
   /* ── Mapeamento para variáveis do sistema ── */
   --brand: var(--neonGreen);
-  --brand-strong: #059669;
+  --brand-strong: #4E2570;
   --brand-master: var(--errorRed);
 
-  --bg-deep: var(--darkBg);
-  --panel: #1A2540;
-  --panel-2: var(--selectBlue);
-  --hairline: #263350;
-  --hairline-strong: rgba(46,69,112,0.6);
+  --bg-deep: #FFFFFF;
+  --panel: #FFFFFF;
+  --panel-2: #F7F5F9;
+  --hairline: #E4E1E6;
+  --hairline-strong: #D3CED9;
 
   --surface: var(--panel);
-  --sidebar-bg: var(--darkBg);
+  --sidebar-bg: #FFFFFF;
 
   --background: var(--bg-deep);
   --foreground: var(--textPrimary);
   --card: var(--panel);
   --card-foreground: var(--textPrimary);
-  --popover: #1A2540;
+  --popover: #FFFFFF;
   --popover-foreground: var(--textPrimary);
 
   --primary: var(--neonGreen);
-  --primary-foreground: #0A1F14;
-  --secondary: var(--selectBlue);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--panel-2);
   --secondary-foreground: var(--textPrimary);
-  --muted: #151F30;
+  --muted: #F4F4F5;
   --muted-foreground: var(--textMuted);
-  --accent: var(--selectBlue);
-  --accent-foreground: var(--selectBlueText);
+  --accent: #FFF1E6;
+  --accent-foreground: #B85A12;
   --destructive: var(--errorRed);
-  --destructive-foreground: #1B0606;
+  --destructive-foreground: #FFFFFF;
   --border: var(--hairline);
-  --input: rgba(255,255,255,.08);
-  --ring: var(--selectBlueBorder);
+  --input: #E4E1E6;
+  --ring: var(--brand);
 
-  --chart-1: #34D399;
-  --chart-2: #60A5FA;
-  --chart-3: #A3E635;
-  --chart-4: #F87171;
-  --chart-5: #FBBF24;
+  --chart-1: #67308E;
+  --chart-2: #FF7922;
+  --chart-3: #606060;
+  --chart-4: #3B82F6;
+  --chart-5: #DC2626;
 
   --sidebar: var(--sidebar-bg);
   --sidebar-foreground: var(--textPrimary);
   --sidebar-primary: var(--neonGreen);
-  --sidebar-primary-foreground: #0A1F14;
-  --sidebar-accent: var(--selectBlue);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: var(--panel-2);
   --sidebar-accent-foreground: var(--selectBlueText);
   --sidebar-border: var(--hairline);
-  --sidebar-ring: var(--selectBlueBorder);
+  --sidebar-ring: var(--brand);
 
-  --brand-soft: rgba(52,211,153,.10);
-  --brand-soft-strong: rgba(52,211,153,.20);
+  --brand-soft: rgba(103,48,142,.08);
+  --brand-soft-strong: rgba(103,48,142,.18);
   --brand-text: var(--neonGreen);
 
-  --shadow-card: 0 1px 0 rgba(255,255,255,.03) inset, 0 4px 16px -8px rgba(0,0,0,.6);
-  --shadow-glow: 0 0 0 1px rgba(52,211,153,.18), 0 8px 28px -10px rgba(52,211,153,.25);
+  --shadow-card: 0 1px 2px rgba(38,34,41,.04), 0 1px 3px rgba(38,34,41,.06);
+  --shadow-glow: 0 0 0 1px rgba(103,48,142,.15), 0 8px 24px -10px rgba(103,48,142,.3);
 
   --page-gradient:
-    radial-gradient(1000px 500px at 80% -10%, rgba(52,211,153,.05), transparent 60%),
-    radial-gradient(800px 400px at -10% 20%, rgba(46,69,112,.08), transparent 60%),
-    var(--bg-deep);
+    radial-gradient(1000px 500px at 80% -10%, rgba(255,121,34,.04), transparent 60%),
+    radial-gradient(800px 400px at -10% 20%, rgba(103,48,142,.05), transparent 60%),
+    #FFFFFF;
 }
 
-/* .dark alias para compatibilidade com componentes shadcn */
+/* .dark alias para compatibilidade com componentes shadcn — ainda não tem
+   variante escura própria; mantém os mesmos tokens do tema claro. */
 .dark {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html, body {
-  background: #0D1117;
+  background: #FFFFFF;
   color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 16px;
