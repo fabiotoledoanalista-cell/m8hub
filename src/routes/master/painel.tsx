@@ -40,16 +40,16 @@ function Painel() {
       </header>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-        <MasterKpi accent icon={<Building2 className="size-4" />} label="Empresas" value={s.total} trend={`+${s.novasMes} este mês`} />
-        <MasterKpi icon={<Activity className="size-4" />} label="Ativas" value={s.ativas} trend={`${Math.round((s.ativas / Math.max(1, s.total)) * 100)}%`} />
-        <MasterKpi icon={<Sparkles className="size-4" />} label="Em trial" value={s.trial} />
-        <MasterKpi icon={<Pause className="size-4" />} label="Suspensas" value={s.suspensas} />
+        <MasterKpi tone="purple" icon={<Building2 className="size-4" />} label="Empresas" value={s.total} trend={`+${s.novasMes} este mês`} />
+        <MasterKpi tone="orange" icon={<Activity className="size-4" />} label="Ativas" value={s.ativas} trend={`${Math.round((s.ativas / Math.max(1, s.total)) * 100)}%`} />
+        <MasterKpi tone="lilac" icon={<Sparkles className="size-4" />} label="Em trial" value={s.trial} />
+        <MasterKpi tone="peach" icon={<Pause className="size-4" />} label="Suspensas" value={s.suspensas} />
       </div>
 
       <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-3">
-        <MasterKpi icon={<TrendingUp className="size-4" />} label="Novas no mês" value={s.novasMes} />
-        <MasterKpi icon={<MessageSquareText className="size-4" />} label="Mensagens (total)" value={s.mensagens} />
-        <MasterKpi icon={<KanbanSquare className="size-4" />} label="Cards no funil (total)" value={s.cards} />
+        <MasterKpi tone="orange" icon={<TrendingUp className="size-4" />} label="Novas no mês" value={s.novasMes} />
+        <MasterKpi tone="purple" icon={<MessageSquareText className="size-4" />} label="Mensagens (total)" value={s.mensagens} />
+        <MasterKpi tone="lilac" icon={<KanbanSquare className="size-4" />} label="Cards no funil (total)" value={s.cards} />
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-5">
@@ -69,21 +69,45 @@ function Painel() {
   );
 }
 
-function MasterKpi({ icon, label, value, trend, accent }: { icon: React.ReactNode; label: string; value: React.ReactNode; trend?: React.ReactNode; accent?: boolean }) {
+type KpiTone = "purple" | "orange" | "lilac" | "peach";
+
+const KPI_TONES: Record<KpiTone, { border: string; bg: string; icon: string; trend: string }> = {
+  purple: {
+    border: "border-[rgba(103,48,142,.28)]",
+    bg: "bg-[linear-gradient(160deg,rgba(103,48,142,.12),rgba(103,48,142,.02))]",
+    icon: "text-[#67308E]",
+    trend: "text-[#67308E]",
+  },
+  orange: {
+    border: "border-[rgba(255,121,34,.32)]",
+    bg: "bg-[linear-gradient(160deg,rgba(255,121,34,.14),rgba(255,121,34,.02))]",
+    icon: "text-[#C2570F]",
+    trend: "text-[#C2570F]",
+  },
+  lilac: {
+    border: "border-[rgba(155,109,196,.30)]",
+    bg: "bg-[linear-gradient(160deg,rgba(155,109,196,.14),rgba(155,109,196,.02))]",
+    icon: "text-[#8C56B5]",
+    trend: "text-[#8C56B5]",
+  },
+  peach: {
+    border: "border-[rgba(255,159,90,.32)]",
+    bg: "bg-[linear-gradient(160deg,rgba(255,159,90,.16),rgba(255,159,90,.03))]",
+    icon: "text-[#D9740A]",
+    trend: "text-[#D9740A]",
+  },
+};
+
+function MasterKpi({ icon, label, value, trend, tone = "purple" }: { icon: React.ReactNode; label: string; value: React.ReactNode; trend?: React.ReactNode; tone?: KpiTone }) {
+  const t = KPI_TONES[tone];
   return (
-    <div
-      className={`rounded-2xl border p-4 sm:p-5 ${
-        accent
-          ? "border-[color:var(--brand-soft-strong)] bg-[linear-gradient(160deg,var(--brand-soft),transparent)]"
-          : "border-border bg-card"
-      }`}
-    >
+    <div className={`rounded-2xl border p-4 sm:p-5 ${t.border} ${t.bg}`}>
       <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-        <span className="text-[#67308E]">{icon}</span>
+        <span className={t.icon}>{icon}</span>
         <span className="truncate">{label}</span>
       </div>
       <div className="font-display font-extrabold text-2xl sm:text-3xl mt-2">{value}</div>
-      {trend && <div className="text-xs mt-2 text-[color:var(--brand-strong)] flex items-center gap-1.5"><TrendingUp className="size-3.5" />{trend}</div>}
+      {trend && <div className={`text-xs mt-2 flex items-center gap-1.5 ${t.trend}`}><TrendingUp className="size-3.5" />{trend}</div>}
     </div>
   );
 }
