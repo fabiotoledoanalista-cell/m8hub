@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { TrendingUp } from "lucide-react";
 
-type Tone = "purple" | "orange" | "blue" | "green";
+type Tone = "purple" | "orange" | "lilac" | "peach";
 
 const TONES: Record<Tone, { border: string; bg: string; icon: string; trend: string }> = {
   purple: {
@@ -17,17 +17,17 @@ const TONES: Record<Tone, { border: string; bg: string; icon: string; trend: str
     icon: "text-[#C2570F]",
     trend: "text-[#C2570F]",
   },
-  blue: {
-    border: "border-[rgba(59,130,246,.28)]",
-    bg: "bg-[linear-gradient(160deg,rgba(59,130,246,.12),rgba(59,130,246,.02))]",
-    icon: "text-[#2563EB]",
-    trend: "text-[#2563EB]",
+  lilac: {
+    border: "border-[rgba(155,109,196,.30)]",
+    bg: "bg-[linear-gradient(160deg,rgba(155,109,196,.14),rgba(155,109,196,.02))]",
+    icon: "text-[#8C56B5]",
+    trend: "text-[#8C56B5]",
   },
-  green: {
-    border: "border-[rgba(22,163,74,.28)]",
-    bg: "bg-[linear-gradient(160deg,rgba(22,163,74,.12),rgba(22,163,74,.02))]",
-    icon: "text-[#15803D]",
-    trend: "text-[#15803D]",
+  peach: {
+    border: "border-[rgba(255,159,90,.32)]",
+    bg: "bg-[linear-gradient(160deg,rgba(255,159,90,.16),rgba(255,159,90,.03))]",
+    icon: "text-[#D9740A]",
+    trend: "text-[#D9740A]",
   },
 };
 

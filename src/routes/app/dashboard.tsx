@@ -153,8 +153,8 @@ function Dashboard() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <KpiCard tone="purple" icon={<MessageCircle className="size-4" />} label="Conversas" value={totalConv} trend={`${stats.recebidas} recebidas`} />
         <KpiCard tone="orange" icon={<Bot className="size-4" />} label="Resolvidas pela IA" value={stats.respondidasIa} trend={`${taxaIa}% no automático`} />
-        <KpiCard tone="blue" icon={<Target className="size-4" />} label="Em negociação" value={stats.negociando} trend={`${stats.conversas} em conversa`} />
-        <KpiCard tone="green" icon={<DollarSign className="size-4" />} label="Receita (ganhos)" value={`R$ ${stats.receita.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} trend={`${stats.ganho} ganhos`} />
+        <KpiCard tone="lilac" icon={<Target className="size-4" />} label="Em negociação" value={stats.negociando} trend={`${stats.conversas} em conversa`} />
+        <KpiCard tone="peach" icon={<DollarSign className="size-4" />} label="Receita (ganhos)" value={`R$ ${stats.receita.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} trend={`${stats.ganho} ganhos`} />
       </div>
 
       <div className="grid lg:grid-cols-[1.6fr_1fr] gap-5">
