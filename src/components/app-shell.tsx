@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Bot, KanbanSquare, LogOut, Smartphone, Shield,
   Inbox, Users, BarChart3, Settings, Contact, Zap, MessageCircle,
   Megaphone, Clock, Workflow, Globe, ListFilter, MessageSquareText, Repeat2, Activity, BookOpen,
+  CircleUserRound,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { brand, supportWhatsappUrl, supportWhatsappDisplay } from "@/config/brand";
@@ -61,6 +62,7 @@ const sections: { label: string; items: NavItem[] }[] = [
       { to: "/app/integracao", label: "Integrações", icon: Globe, adminOnly: true },
       { to: "/app/configuracoes", label: "Configurações", icon: Settings, adminOnly: true, superAdminOnly: true },
       { to: "/app/manual", label: "Manual do Sistema", icon: BookOpen, adminOnly: true },
+      { to: "/app/perfil", label: "Meu Perfil", icon: CircleUserRound },
     ],
   },
 ];

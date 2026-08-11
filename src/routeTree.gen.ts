@@ -40,6 +40,7 @@ import { Route as DemoAgenteRouteImport } from './routes/demo/agente'
 import { Route as AppSupervisaoRouteImport } from './routes/app/supervisao'
 import { Route as AppRespostasRapidasRouteImport } from './routes/app/respostas-rapidas'
 import { Route as AppRelatoriosRouteImport } from './routes/app/relatorios'
+import { Route as AppPerfilRouteImport } from './routes/app/perfil'
 import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
 import { Route as AppManualRouteImport } from './routes/app/manual'
 import { Route as AppIntegracaoRouteImport } from './routes/app/integracao'
@@ -220,6 +221,11 @@ const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPerfilRoute = AppPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOnboardingRoute = AppOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -372,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/app/integracao': typeof AppIntegracaoRoute
   '/app/manual': typeof AppManualRoute
   '/app/onboarding': typeof AppOnboardingRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/respostas-rapidas': typeof AppRespostasRapidasRoute
   '/app/supervisao': typeof AppSupervisaoRoute
@@ -427,6 +434,7 @@ export interface FileRoutesByTo {
   '/app/integracao': typeof AppIntegracaoRoute
   '/app/manual': typeof AppManualRoute
   '/app/onboarding': typeof AppOnboardingRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/respostas-rapidas': typeof AppRespostasRapidasRoute
   '/app/supervisao': typeof AppSupervisaoRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/app/integracao': typeof AppIntegracaoRoute
   '/app/manual': typeof AppManualRoute
   '/app/onboarding': typeof AppOnboardingRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/respostas-rapidas': typeof AppRespostasRapidasRoute
   '/app/supervisao': typeof AppSupervisaoRoute
@@ -544,6 +553,7 @@ export interface FileRouteTypes {
     | '/app/integracao'
     | '/app/manual'
     | '/app/onboarding'
+    | '/app/perfil'
     | '/app/relatorios'
     | '/app/respostas-rapidas'
     | '/app/supervisao'
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/app/integracao'
     | '/app/manual'
     | '/app/onboarding'
+    | '/app/perfil'
     | '/app/relatorios'
     | '/app/respostas-rapidas'
     | '/app/supervisao'
@@ -656,6 +667,7 @@ export interface FileRouteTypes {
     | '/app/integracao'
     | '/app/manual'
     | '/app/onboarding'
+    | '/app/perfil'
     | '/app/relatorios'
     | '/app/respostas-rapidas'
     | '/app/supervisao'
@@ -923,6 +935,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRelatoriosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/perfil': {
+      id: '/app/perfil'
+      path: '/perfil'
+      fullPath: '/app/perfil'
+      preLoaderRoute: typeof AppPerfilRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/onboarding': {
       id: '/app/onboarding'
       path: '/onboarding'
@@ -1113,6 +1132,7 @@ interface AppRouteChildren {
   AppIntegracaoRoute: typeof AppIntegracaoRoute
   AppManualRoute: typeof AppManualRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
+  AppPerfilRoute: typeof AppPerfilRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRespostasRapidasRoute: typeof AppRespostasRapidasRoute
   AppSupervisaoRoute: typeof AppSupervisaoRoute
@@ -1137,6 +1157,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIntegracaoRoute: AppIntegracaoRoute,
   AppManualRoute: AppManualRoute,
   AppOnboardingRoute: AppOnboardingRoute,
+  AppPerfilRoute: AppPerfilRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRespostasRapidasRoute: AppRespostasRapidasRoute,
   AppSupervisaoRoute: AppSupervisaoRoute,
