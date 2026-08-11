@@ -116,7 +116,7 @@ export type BrandTokens = {
 
 /**
  * Gera o conjunto completo de tokens de marca (mesma "saturação"/tratamento
- * usado no roxo/laranja do M8HUB) a partir de UMA cor base, via HSL.
+ * usado no roxo/laranja do TGestCRM) a partir de UMA cor base, via HSL.
  */
 export function deriveBrandTokens(hex: string): BrandTokens {
   const [r, g, b] = hexToRgb(hex);

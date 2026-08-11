@@ -217,7 +217,7 @@ function ConfigPage() {
               <Input
                 value={identidade.nome_fantasia}
                 onChange={(e) => setIdentidade({ ...identidade, nome_fantasia: e.target.value })}
-                placeholder="Aparece no lugar de &quot;M8HUB&quot; no menu lateral"
+                placeholder={`Aparece no lugar de "${brand.name}" no menu lateral`}
               />
               <p className="text-xs text-muted-foreground mt-1">Se deixar em branco, usa o nome da empresa.</p>
             </div>
