@@ -1,6 +1,6 @@
 // Branding centralizado. Troque aqui pra renomear/recolorir o app inteiro.
 export const brand = {
-  name: "TGestCRM",
+  name: "M8HUB",
   tagline: "Atendimento inteligente via WhatsApp",
   primary: "#67308E",
   primaryOklch: "0.38 0.16 315",
