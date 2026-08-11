@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listScheduledMessages, createScheduledMessage, cancelScheduledMessage, deleteScheduledMessage } from "@/lib/scheduled-messages.functions";
@@ -11,6 +11,9 @@ import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/app/agendadas")({
   head: () => ({ meta: [{ title: `${brand.name} — Mensagens Agendadas` }] }),
+  beforeLoad: ({ context }: any) => {
+    if (context?.membership?.role === "atendente") throw redirect({ to: "/app/dashboard" });
+  },
   component: AgendadasPage,
 });
 

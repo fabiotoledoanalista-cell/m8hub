@@ -186,8 +186,9 @@ function EntrarPage() {
             </div>
           </div>
 
-          <div className="text-[12px] text-muted-foreground">
-            © {new Date().getFullYear()} {brand.name}. Todos os direitos reservados.
+          <div className="text-[12px] text-muted-foreground space-y-0.5">
+            <div>© {new Date().getFullYear()} {brand.name}. Todos os direitos reservados.</div>
+            <div className="text-[10px] text-muted-foreground/60">Desenvolvido por ToledoTech Digital</div>
           </div>
         </aside>
 

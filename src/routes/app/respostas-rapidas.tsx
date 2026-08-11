@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listQuickReplies, upsertQuickReply, deleteQuickReply } from "@/lib/quick-replies.functions";
@@ -12,6 +12,9 @@ import { brand } from "@/config/brand";
 
 export const Route = createFileRoute("/app/respostas-rapidas")({
   head: () => ({ meta: [{ title: `${brand.name} — Respostas rápidas` }] }),
+  beforeLoad: ({ context }: any) => {
+    if (context?.membership?.role === "atendente") throw redirect({ to: "/app/dashboard" });
+  },
   component: RespostasRapidasPage,
 });
 

@@ -24,6 +24,7 @@ type NavItem = {
   adminOnly?: boolean;
   supervisorOk?: boolean;
   superAdminOnly?: boolean;
+  hideForAtendente?: boolean;
   tag?: string;
   badge?: boolean;
 };
@@ -42,7 +43,7 @@ const sections: { label: string; items: NavItem[] }[] = [
     label: "Marketing",
     items: [
       { to: "/app/campanhas", label: "Campanhas", icon: Megaphone, adminOnly: true },
-      { to: "/app/agendadas", label: "Agendadas", icon: Clock },
+      { to: "/app/agendadas", label: "Agendadas", icon: Clock, hideForAtendente: true },
       { to: "/app/followup", label: "Cadências", icon: Repeat2, adminOnly: true, superAdminOnly: true, tag: "NOVO" },
       { to: "/app/flows", label: "Flow Builder", icon: Workflow, adminOnly: true, superAdminOnly: true, tag: "NOVO" },
     ],
@@ -52,10 +53,10 @@ const sections: { label: string; items: NavItem[] }[] = [
     items: [
       { to: "/app/contatos", label: "Contatos", icon: Contact },
       { to: "/app/filas", label: "Filas", icon: ListFilter, adminOnly: true },
-      { to: "/app/respostas-rapidas", label: "Respostas Rápidas", icon: MessageSquareText },
+      { to: "/app/respostas-rapidas", label: "Respostas Rápidas", icon: MessageSquareText, hideForAtendente: true },
       { to: "/app/supervisao", label: "Supervisão", icon: Activity, adminOnly: true, supervisorOk: true },
       { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, adminOnly: true, supervisorOk: true },
-      { to: "/app/conexao", label: "Conexão", icon: Smartphone },
+      { to: "/app/conexao", label: "Conexão", icon: Smartphone, hideForAtendente: true },
       { to: "/app/equipe", label: "Equipe", icon: Users, adminOnly: true, supervisorOk: true },
       { to: "/app/integracao", label: "Integrações", icon: Globe, adminOnly: true },
       { to: "/app/configuracoes", label: "Configurações", icon: Settings, adminOnly: true },
@@ -100,11 +101,12 @@ export function AppShell({
   const displayName = company?.nome_fantasia || company?.nome || brand.name;
   const isAdmin = membership?.role === "owner" || membership?.role === "admin";
   const isSupervisor = membership?.role === "supervisor";
+  const isAtendente = membership?.role === "atendente";
   const roleLabel =
     membership?.role === "owner" ? "Dono"
-    : membership?.role === "admin" ? "Administrador"
-    : membership?.role === "supervisor" ? "Supervisor"
-    : membership?.role === "atendente" ? "Atendente"
+    : membership?.role === "admin" ? "Admin"
+    : membership?.role === "supervisor" ? "Gestor"
+    : membership?.role === "atendente" ? "Colaborador"
     : "Membro";
   const userName = nome || (email || "Você").split("@")[0];
 
@@ -113,9 +115,11 @@ export function AppShell({
     { to: "/app/conversas", label: "Conversas", icon: Inbox },
     { to: "/app/crm", label: "CRM", icon: KanbanSquare },
     { to: "/app/contatos", label: "Contatos", icon: Contact },
-    isAdmin
-      ? { to: "/app/agente", label: "Agente", icon: Bot }
-      : { to: "/app/conexao", label: "Conexão", icon: Smartphone },
+    ...(isAdmin
+      ? [{ to: "/app/agente", label: "Agente", icon: Bot }]
+      : isAtendente
+        ? []
+        : [{ to: "/app/conexao", label: "Conexão", icon: Smartphone }]),
   ];
 
   return (
@@ -164,6 +168,7 @@ export function AppShell({
           isSuperAdmin={isSuperAdmin}
           isAdmin={isAdmin}
           isSupervisor={isSupervisor}
+          isAtendente={isAtendente}
           primary={primary}
           displayName={displayName}
           userName={userName}
@@ -200,7 +205,7 @@ export function AppShell({
 }
 
 function Sidebar({
-  loc, isSuperAdmin, isAdmin, isSupervisor, primary, displayName, userName, roleLabel,
+  loc, isSuperAdmin, isAdmin, isSupervisor, isAtendente, primary, displayName, userName, roleLabel,
 }: any) {
   return (
     <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
@@ -214,21 +219,25 @@ function Sidebar({
       </div>
 
       <nav className="p-3 flex-1 overflow-y-auto space-y-5">
-        {sections.map((sec) => (
+        {sections.map((sec) => {
+          const visibleItems = sec.items
+            .filter((i) => !i.superAdminOnly || isSuperAdmin)
+            .filter((i) => !i.adminOnly || isAdmin || (isSupervisor && i.supervisorOk))
+            .filter((i) => !i.hideForAtendente || !isAtendente);
+          if (visibleItems.length === 0) return null;
+          return (
           <div key={sec.label}>
             <div className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
               {sec.label}
             </div>
             <div className="flex flex-col gap-1">
-              {sec.items
-                .filter((i) => !i.superAdminOnly || isSuperAdmin)
-                .filter((i) => !i.adminOnly || isAdmin || (isSupervisor && i.supervisorOk))
-                .map((item) => (
+              {visibleItems.map((item) => (
                 <NavLink key={item.to} item={item} active={loc.pathname.startsWith(item.to)} primary={primary} />
               ))}
             </div>
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="p-3 border-t border-[color:var(--hairline)]">
@@ -246,6 +255,7 @@ function Sidebar({
           <MessageCircle className="size-3" />
           <span>Suporte: {supportWhatsappDisplay}</span>
         </a>
+        <div className="mt-2 px-2 text-[10px] text-muted-foreground/60">Desenvolvido por ToledoTech Digital</div>
       </div>
     </aside>
   );

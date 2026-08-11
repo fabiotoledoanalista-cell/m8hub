@@ -33,6 +33,7 @@ function ConfigPage() {
   const companyId = ctx.company?.id;
   const userId = ctx.user.id;
   const company = ctx.company;
+  const isSuperAdmin = !!(ctx as any).isSuperAdmin;
 
   const [empresa, setEmpresa] = useState({ nome: "", telefone: "" });
   const [identidade, setIdentidade] = useState({ primary_color: "#67308E", logo_url: "", nome_fantasia: "" });
@@ -188,7 +189,7 @@ function ConfigPage() {
         <TabsList>
           <TabsTrigger value="plano">Plano</TabsTrigger>
           <TabsTrigger value="empresa">Empresa</TabsTrigger>
-          <TabsTrigger value="identidade">Identidade</TabsTrigger>
+          {isSuperAdmin && <TabsTrigger value="identidade">Identidade</TabsTrigger>}
           <TabsTrigger value="campos">Campos</TabsTrigger>
           <TabsTrigger value="nps">NPS</TabsTrigger>
           <TabsTrigger value="perfil">Perfil</TabsTrigger>
@@ -211,6 +212,12 @@ function ConfigPage() {
         </TabsContent>
 
         <TabsContent value="identidade">
+          {!isSuperAdmin ? (
+            <Card className="p-5 max-w-xl text-sm text-muted-foreground">
+              A identidade visual (nome, logo e cor) é configurada pelo suporte do {brand.name}.
+              Fale com a gente se quiser atualizar algo.
+            </Card>
+          ) : (
           <Card className="p-5 space-y-4 max-w-xl">
             <div>
               <Label>Nome de exibição</Label>
@@ -274,6 +281,7 @@ function ConfigPage() {
               </Button>
             </div>
           </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="campos">

@@ -19,6 +19,13 @@ import { listTeam, inviteMember, setMemberActive, setMemberRole, removeMember, u
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { PlanUsageBadge } from "@/components/plan-usage-badge";
 
+const ROLE_LABEL: Record<string, string> = {
+  owner: "Dono",
+  admin: "Admin",
+  supervisor: "Gestor",
+  atendente: "Colaborador",
+};
+
 export const Route = createFileRoute("/app/equipe")({
   head: () => ({ meta: [{ title: `${brand.name} — Equipe` }] }),
   beforeLoad: ({ context }: any) => {
@@ -142,8 +149,8 @@ function EquipePage() {
             <Select value={role} onValueChange={(v) => setRole(v as any)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="atendente">Atendente</SelectItem>
-                <SelectItem value="supervisor">Supervisor</SelectItem>
+                <SelectItem value="atendente">Colaborador</SelectItem>
+                <SelectItem value="supervisor">Gestor</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
@@ -194,12 +201,12 @@ function EquipePage() {
                       <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="supervisor">Supervisor</SelectItem>
-                        <SelectItem value="atendente">Atendente</SelectItem>
+                        <SelectItem value="supervisor">Gestor</SelectItem>
+                        <SelectItem value="atendente">Colaborador</SelectItem>
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge variant="outline" className="capitalize">{m.role}</Badge>
+                    <Badge variant="outline">{ROLE_LABEL[m.role] ?? m.role}</Badge>
                   )}
                 </div>
                 <div className="col-span-2">
@@ -261,8 +268,8 @@ function EquipePage() {
                   <Select value={editForm.role} onValueChange={(v) => setEditForm((f) => ({ ...f, role: v as any }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="atendente">Atendente</SelectItem>
-                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                      <SelectItem value="atendente">Colaborador</SelectItem>
+                      <SelectItem value="supervisor">Gestor</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>

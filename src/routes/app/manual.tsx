@@ -760,7 +760,7 @@ function SectionSupervisao() {
       <PageDesc>Visão em tempo real de toda a equipe, filas de atendimento e carga de trabalho.</PageDesc>
       <Callout type="warning" icon="🔒">
         O Painel de Supervisão é visível apenas para usuários com perfil{" "}
-        <strong>Admin</strong> ou <strong>Supervisor</strong>. Atendentes não têm acesso.
+        <strong>Admin</strong> ou <strong>Gestor</strong>. Colaboradores não têm acesso.
       </Callout>
       <H2>Indicadores principais (KPIs)</H2>
       <CardGrid
@@ -885,15 +885,15 @@ function SectionEquipe() {
         headers={["Perfil", "O que pode fazer"]}
         rows={[
           [<span className="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">Admin</span>, "Acesso total: configurações, equipe, relatórios, supervisão, faturamento"],
-          [<span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Supervisor</span>, "Painel de supervisão, relatórios, conversas de toda equipe — mas não altera configurações"],
-          [<span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Atendente</span>, "Apenas conversas atribuídas e envio de mensagens. Sem acesso a configurações ou supervisão"],
+          [<span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Gestor</span>, "Painel de supervisão, relatórios, conversas de toda equipe — mas não altera configurações"],
+          [<span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Colaborador</span>, "Conversas, CRM Kanban e Contatos. Sem acesso a configurações ou supervisão"],
         ]}
       />
-      <H2>Convidar um atendente</H2>
+      <H2>Convidar um membro</H2>
       <Steps
         items={[
           { title: "Acesse Equipe", desc: "Clique em Convidar membro." },
-          { title: "Informe o e-mail e o perfil", desc: "Escolha entre Atendente, Supervisor ou Admin." },
+          { title: "Informe o e-mail e o perfil", desc: "Escolha entre Colaborador, Gestor ou Admin." },
           { title: "Compartilhe o acesso", desc: "Se o membro é novo, uma senha temporária é gerada — envie a ele para o primeiro login." },
         ]}
       />

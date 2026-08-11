@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,9 @@ import { PlanUsageBadge } from "@/components/plan-usage-badge";
 
 export const Route = createFileRoute("/app/conexao")({
   head: () => ({ meta: [{ title: `${brand.name} — Conexão` }] }),
+  beforeLoad: ({ context }: any) => {
+    if (context?.membership?.role === "atendente") throw redirect({ to: "/app/dashboard" });
+  },
   component: ConexaoPage,
 });
 
