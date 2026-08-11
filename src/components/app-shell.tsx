@@ -59,7 +59,7 @@ const sections: { label: string; items: NavItem[] }[] = [
       { to: "/app/conexao", label: "Conexão", icon: Smartphone, hideForAtendente: true },
       { to: "/app/equipe", label: "Equipe", icon: Users, adminOnly: true, supervisorOk: true },
       { to: "/app/integracao", label: "Integrações", icon: Globe, adminOnly: true },
-      { to: "/app/configuracoes", label: "Configurações", icon: Settings, adminOnly: true },
+      { to: "/app/configuracoes", label: "Configurações", icon: Settings, adminOnly: true, superAdminOnly: true },
       { to: "/app/manual", label: "Manual do Sistema", icon: BookOpen, adminOnly: true },
     ],
   },

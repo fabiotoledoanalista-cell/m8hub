@@ -21,8 +21,7 @@ import { extractDominantColor, extractDominantColorFromUrl } from "@/lib/color-u
 export const Route = createFileRoute("/app/configuracoes")({
   head: () => ({ meta: [{ title: `${brand.name} — Configurações` }] }),
   beforeLoad: ({ context }: any) => {
-    const r = context?.membership?.role;
-    if (r === "atendente" || r === "supervisor") throw redirect({ to: "/app/dashboard" });
+    if (!context?.isSuperAdmin) throw redirect({ to: "/app/dashboard" });
   },
   component: ConfigPage,
 });
