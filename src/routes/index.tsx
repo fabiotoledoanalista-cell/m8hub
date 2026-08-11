@@ -24,6 +24,12 @@ import {
 
 export const Route = createFileRoute("/")({
   ssr: false,
+  // Por enquanto, quem cair no link raiz vai direto pro login — a landing
+  // page pública ainda não está pronta pra ser mostrada (segue com o visual
+  // antigo, verde/dark). Remover este beforeLoad quando ela for atualizada.
+  beforeLoad: () => {
+    throw redirect({ to: "/entrar", search: { modo: "login" } });
+  },
   head: () => ({
     meta: [
       { title: `${brand.name} — IA atende seu WhatsApp 24h e organiza o CRM sozinha` },
