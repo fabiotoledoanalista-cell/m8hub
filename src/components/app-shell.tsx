@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { brand, supportWhatsappUrl, supportWhatsappDisplay } from "@/config/brand";
+import { deriveBrandTokens } from "@/lib/color-utils";
 import { TrialBanner } from "@/components/trial-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileBottomNav, type MobileNavItem } from "@/components/mobile-bottom-nav";
@@ -95,6 +96,8 @@ export function AppShell({
   }, []);
 
   const primary = company?.primary_color || brand.primary;
+  const tokens = deriveBrandTokens(primary);
+  const displayName = company?.nome_fantasia || company?.nome || brand.name;
   const isAdmin = membership?.role === "owner" || membership?.role === "admin";
   const isSupervisor = membership?.role === "supervisor";
   const roleLabel =
@@ -116,7 +119,20 @@ export function AppShell({
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground" style={{ ["--brand" as any]: primary }}>
+    <div
+      className="min-h-screen flex flex-col bg-background text-foreground"
+      style={{
+        ["--brand" as any]: tokens.brand,
+        ["--brand-strong" as any]: tokens.brandStrong,
+        ["--brand-soft" as any]: tokens.brandSoft,
+        ["--brand-soft-strong" as any]: tokens.brandSoftStrong,
+        ["--brand-text" as any]: tokens.brandText,
+        ["--primary" as any]: tokens.brand,
+        ["--primary-foreground" as any]: tokens.primaryForeground,
+        ["--sidebar-primary" as any]: tokens.brand,
+        ["--ring" as any]: tokens.brand,
+      }}
+    >
       {company && <TrialBanner company={company} />}
 
       {/* Mobile top bar */}
@@ -126,8 +142,8 @@ export function AppShell({
             <img src={company.logo_url} alt={company.nome} className="size-8 rounded-lg object-cover ring-1 ring-[color:var(--hairline)]" />
           )}
           <div className="min-w-0">
-            <div className="font-display font-bold tracking-tight text-[14.5px] leading-none truncate">{brand.name}</div>
-            <div className="text-[10.5px] text-muted-foreground truncate mt-0.5">{company?.nome || "Sua empresa"}</div>
+            <div className="font-display font-bold tracking-tight text-[14.5px] leading-none truncate">{displayName}</div>
+            <div className="text-[10.5px] text-muted-foreground truncate mt-0.5">CRM</div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -149,6 +165,7 @@ export function AppShell({
           isAdmin={isAdmin}
           isSupervisor={isSupervisor}
           primary={primary}
+          displayName={displayName}
           userName={userName}
           roleLabel={roleLabel}
         />
@@ -183,12 +200,12 @@ export function AppShell({
 }
 
 function Sidebar({
-  loc, isSuperAdmin, isAdmin, isSupervisor, primary, userName, roleLabel,
+  loc, isSuperAdmin, isAdmin, isSupervisor, primary, displayName, userName, roleLabel,
 }: any) {
   return (
     <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
       <div className="px-5 py-4 border-b border-[color:var(--hairline)]">
-        <div className="font-display font-extrabold tracking-tight text-[17px] leading-tight">{brand.name}</div>
+        <div className="font-display font-extrabold tracking-tight text-[17px] leading-tight truncate">{displayName}</div>
         <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">CRM</div>
       </div>
       <div className="px-5 py-4 border-b border-[color:var(--hairline)]">

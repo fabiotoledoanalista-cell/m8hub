@@ -16,6 +16,7 @@ import { trialDaysLeft } from "@/lib/tenant";
 import { useServerFn } from "@tanstack/react-start";
 import { listFieldDefs, upsertFieldDef, deleteFieldDef } from "@/lib/custom-fields.functions";
 import { getNpsConfig, saveNpsConfig } from "@/lib/nps.functions";
+import { extractDominantColorFromUrl } from "@/lib/color-utils";
 
 export const Route = createFileRoute("/app/configuracoes")({
   head: () => ({ meta: [{ title: `${brand.name} — Configurações` }] }),
@@ -34,7 +35,9 @@ function ConfigPage() {
   const company = ctx.company;
 
   const [empresa, setEmpresa] = useState({ nome: "", telefone: "" });
-  const [identidade, setIdentidade] = useState({ primary_color: "#67308E", logo_url: "" });
+  const [identidade, setIdentidade] = useState({ primary_color: "#67308E", logo_url: "", nome_fantasia: "" });
+  const [detectedColor, setDetectedColor] = useState<string | null>(null);
+  const [detecting, setDetecting] = useState(false);
   const [perfil, setPerfil] = useState({ nome: "", email: ctx.user.email ?? "" });
   const [senha, setSenha] = useState({ nova: "", confirma: "" });
   const [savingE, setSavingE] = useState(false);
@@ -46,7 +49,11 @@ function ConfigPage() {
   useEffect(() => {
     if (ctx.company) {
       setEmpresa({ nome: ctx.company.nome, telefone: ctx.company.telefone ?? "" });
-      setIdentidade({ primary_color: ctx.company.primary_color, logo_url: ctx.company.logo_url ?? "" });
+      setIdentidade({
+        primary_color: ctx.company.primary_color,
+        logo_url: ctx.company.logo_url ?? "",
+        nome_fantasia: ctx.company.nome_fantasia ?? "",
+      });
     }
     void (async () => {
       const { data } = await supabase.from("profiles").select("nome").eq("user_id", userId).maybeSingle();
@@ -79,11 +86,33 @@ function ConfigPage() {
     if (!companyId) return;
     setSavingI(true);
     const { error } = await supabase.from("company").update({
-      primary_color: identidade.primary_color, logo_url: identidade.logo_url || null,
+      primary_color: identidade.primary_color,
+      logo_url: identidade.logo_url || null,
+      nome_fantasia: identidade.nome_fantasia || null,
     }).eq("id", companyId);
     setSavingI(false);
     if (error) return toast.error(error.message);
     toast.success("Identidade atualizada"); setTimeout(() => location.reload(), 500);
+  }
+
+  async function detectarCor() {
+    if (!identidade.logo_url) return;
+    setDetecting(true);
+    setDetectedColor(null);
+    const cor = await extractDominantColorFromUrl(identidade.logo_url);
+    setDetecting(false);
+    if (!cor) {
+      toast.error("Não consegui identificar uma cor confiável nessa logo. Tente outra imagem ou escolha manualmente.");
+      return;
+    }
+    setDetectedColor(cor);
+  }
+
+  function usarCorDetectada() {
+    if (!detectedColor) return;
+    setIdentidade((p) => ({ ...p, primary_color: detectedColor }));
+    setDetectedColor(null);
+    toast.success("Cor aplicada. Clique em Salvar para confirmar.");
   }
 
   async function savePerfil() {
@@ -140,16 +169,46 @@ function ConfigPage() {
         <TabsContent value="identidade">
           <Card className="p-5 space-y-4 max-w-xl">
             <div>
+              <Label>Nome de exibição</Label>
+              <Input
+                value={identidade.nome_fantasia}
+                onChange={(e) => setIdentidade({ ...identidade, nome_fantasia: e.target.value })}
+                placeholder="Aparece no lugar de &quot;M8HUB&quot; no menu lateral"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Se deixar em branco, usa o nome da empresa.</p>
+            </div>
+            <div>
+              <Label>URL do logo</Label>
+              <Input value={identidade.logo_url} onChange={(e) => { setIdentidade({ ...identidade, logo_url: e.target.value }); setDetectedColor(null); }} placeholder="https://…" />
+              {identidade.logo_url && (
+                <div className="mt-2 flex items-center gap-3">
+                  <img src={identidade.logo_url} alt="logo" className="size-16 rounded object-cover border" />
+                  <Button type="button" variant="outline" size="sm" onClick={detectarCor} disabled={detecting}>
+                    {detecting ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Sparkles className="size-3.5 mr-1.5" />}
+                    Detectar cor da logo
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {detectedColor && (
+              <div className="rounded-xl border border-[color:var(--brand-soft-strong)] bg-[color:var(--brand-soft)] p-3.5 flex items-center gap-3">
+                <div className="size-10 rounded-lg border shrink-0" style={{ background: detectedColor }} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium">Detectamos essa cor na sua logo</div>
+                  <div className="text-xs text-muted-foreground">{detectedColor} — confirma pra aplicar em todo o sistema?</div>
+                </div>
+                <Button type="button" size="sm" variant="outline" onClick={() => setDetectedColor(null)}>Manter atual</Button>
+                <Button type="button" size="sm" onClick={usarCorDetectada}>Usar essa cor</Button>
+              </div>
+            )}
+
+            <div>
               <Label>Cor primária</Label>
               <div className="flex gap-2 items-center">
                 <input type="color" value={identidade.primary_color} onChange={(e) => setIdentidade({ ...identidade, primary_color: e.target.value })} className="h-10 w-14 rounded border" />
                 <Input value={identidade.primary_color} onChange={(e) => setIdentidade({ ...identidade, primary_color: e.target.value })} />
               </div>
-            </div>
-            <div>
-              <Label>URL do logo</Label>
-              <Input value={identidade.logo_url} onChange={(e) => setIdentidade({ ...identidade, logo_url: e.target.value })} placeholder="https://…" />
-              {identidade.logo_url && <img src={identidade.logo_url} alt="logo" className="mt-2 size-16 rounded object-cover border" />}
             </div>
             <div className="flex justify-end">
               <Button onClick={saveIdentidade} disabled={savingI}>
