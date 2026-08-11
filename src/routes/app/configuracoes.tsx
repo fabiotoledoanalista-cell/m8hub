@@ -10,13 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Save, CreditCard, Sparkles, AlertTriangle, Plus, Trash2, GripVertical } from "lucide-react";
+import { Loader2, Save, CreditCard, Sparkles, AlertTriangle, Plus, Trash2, GripVertical, Upload } from "lucide-react";
 import { brand } from "@/config/brand";
 import { trialDaysLeft } from "@/lib/tenant";
 import { useServerFn } from "@tanstack/react-start";
 import { listFieldDefs, upsertFieldDef, deleteFieldDef } from "@/lib/custom-fields.functions";
 import { getNpsConfig, saveNpsConfig } from "@/lib/nps.functions";
-import { extractDominantColorFromUrl } from "@/lib/color-utils";
+import { extractDominantColor, extractDominantColorFromUrl } from "@/lib/color-utils";
 
 export const Route = createFileRoute("/app/configuracoes")({
   head: () => ({ meta: [{ title: `${brand.name} — Configurações` }] }),
@@ -38,6 +38,7 @@ function ConfigPage() {
   const [identidade, setIdentidade] = useState({ primary_color: "#67308E", logo_url: "", nome_fantasia: "" });
   const [detectedColor, setDetectedColor] = useState<string | null>(null);
   const [detecting, setDetecting] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [perfil, setPerfil] = useState({ nome: "", email: ctx.user.email ?? "" });
   const [senha, setSenha] = useState({ nova: "", confirma: "" });
   const [savingE, setSavingE] = useState(false);
@@ -115,6 +116,49 @@ function ConfigPage() {
     toast.success("Cor aplicada. Clique em Salvar para confirmar.");
   }
 
+  async function onLogoFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !companyId) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Arquivo muito grande (máximo 3MB).");
+      return;
+    }
+
+    setUploadingLogo(true);
+    setDetectedColor(null);
+    try {
+      // Extrai a cor localmente, direto do arquivo — sem depender de rede/CORS.
+      const localUrl = URL.createObjectURL(file);
+      const img = new Image();
+      const cor = await new Promise<string | null>((resolve) => {
+        img.onload = () => resolve(extractDominantColor(img));
+        img.onerror = () => resolve(null);
+        img.src = localUrl;
+      });
+      URL.revokeObjectURL(localUrl);
+
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `${companyId}/logo.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      // Evita cache de navegador servindo a logo antiga no mesmo nome de arquivo.
+      const logoUrl = `${pub.publicUrl}?v=${Date.now()}`;
+
+      setIdentidade((p) => ({ ...p, logo_url: logoUrl }));
+      if (cor) setDetectedColor(cor);
+      toast.success("Logo enviada. Clique em Salvar para confirmar.");
+    } catch (err: any) {
+      toast.error(err?.message || "Falha ao enviar a logo.");
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
+
   async function savePerfil() {
     setSavingP(true);
     const { error } = await supabase.from("profiles").update({ nome: perfil.nome || null }).eq("user_id", userId);
@@ -178,17 +222,31 @@ function ConfigPage() {
               <p className="text-xs text-muted-foreground mt-1">Se deixar em branco, usa o nome da empresa.</p>
             </div>
             <div>
-              <Label>URL do logo</Label>
-              <Input value={identidade.logo_url} onChange={(e) => { setIdentidade({ ...identidade, logo_url: e.target.value }); setDetectedColor(null); }} placeholder="https://…" />
-              {identidade.logo_url && (
-                <div className="mt-2 flex items-center gap-3">
-                  <img src={identidade.logo_url} alt="logo" className="size-16 rounded object-cover border" />
-                  <Button type="button" variant="outline" size="sm" onClick={detectarCor} disabled={detecting}>
+              <Label>Logo da empresa</Label>
+              <div className="flex items-center gap-3 mt-1">
+                {identidade.logo_url && (
+                  <img src={identidade.logo_url} alt="logo" className="size-16 rounded object-cover border shrink-0" />
+                )}
+                <div className="flex flex-col gap-1.5">
+                  <label className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md border border-input bg-background hover:bg-accent cursor-pointer w-fit">
+                    {uploadingLogo ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                    {uploadingLogo ? "Enviando…" : "Enviar arquivo (PNG, JPG, SVG — até 3MB)"}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" className="hidden" onChange={onLogoFileSelected} disabled={uploadingLogo} />
+                  </label>
+                  <p className="text-xs text-muted-foreground">A cor é detectada automaticamente ao enviar o arquivo.</p>
+                </div>
+              </div>
+
+              <details className="mt-2">
+                <summary className="text-xs text-muted-foreground cursor-pointer select-none">Já tenho a logo hospedada em outro link</summary>
+                <div className="mt-2 flex items-center gap-2">
+                  <Input value={identidade.logo_url} onChange={(e) => { setIdentidade({ ...identidade, logo_url: e.target.value }); setDetectedColor(null); }} placeholder="https://…" />
+                  <Button type="button" variant="outline" size="sm" onClick={detectarCor} disabled={detecting || !identidade.logo_url}>
                     {detecting ? <Loader2 className="size-3.5 mr-1.5 animate-spin" /> : <Sparkles className="size-3.5 mr-1.5" />}
-                    Detectar cor da logo
+                    Detectar cor
                   </Button>
                 </div>
-              )}
+              </details>
             </div>
 
             {detectedColor && (
